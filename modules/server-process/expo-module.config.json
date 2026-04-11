@@ -1,0 +1,6 @@
+{
+  "name": "ServerProcess",
+  "android": {
+    "modules": ["com.pockethost.ServerProcessModule"]
+  }
+}
