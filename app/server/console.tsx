@@ -1,18 +1,17 @@
-import { FlatList, KeyboardAvoidingView, Platform, View } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Platform, View, Text } from 'react-native';
 import { useEffect, useRef } from 'react';
 import { useServerStore } from '../../src/stores/serverStore';
 import { serverManager } from '../../src/services/serverManager';
-import { ConsoleOutput } from '../../src/components/console/ConsoleOutput';
-import { ConsoleInput } from '../../src/components/console/ConsoleInput';
 import { theme } from '../../src/lib/theme';
+import { ConsoleInput } from '../../src/components/console/ConsoleInput';
+import { ConsoleOutput } from '../../src/components/console/ConsoleOutput';
 
 export default function ConsoleScreen() {
-  const { activeServerId, consoleLogs } = useServerStore();
-  const logs = activeServerId ? consoleLogs[activeServerId] ?? [] : [];
+  const activeServerId = useServerStore(s => s.activeServerId);
+  const logs = useServerStore(s => activeServerId ? (s.consoleLogs[activeServerId] ?? []) : []);
   const flatRef = useRef<FlatList>(null);
 
   useEffect(() => {
-    // Auto-scroll on mount or log changes
     if (logs.length > 0) {
       setTimeout(() => flatRef.current?.scrollToEnd({ animated: true }), 100);
     }
@@ -21,10 +20,8 @@ export default function ConsoleScreen() {
   const handleCommand = (cmd: string) => {
     if (!activeServerId) return;
     
-    // Optimistic UI for command entry
     useServerStore.getState().appendLog(activeServerId, `> ${cmd}`);
     
-    // Only send if running
     if (serverManager.isRunning()) {
       serverManager.sendCommand(cmd).catch(e => {
         useServerStore.getState().appendLog(activeServerId, `[ERROR] Failed to send command: ${e.message}`);

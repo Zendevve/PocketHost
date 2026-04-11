@@ -1,4 +1,5 @@
 import { Pressable, StyleProp, StyleSheet, Text, ViewStyle } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { colors } from '../../lib/theme';
 
 type Variant = 'default' | 'secondary' | 'danger';
@@ -18,9 +19,22 @@ const variantStyles: Record<Variant, ViewStyle> = {
 };
 
 export function Button({ title, onPress, disabled, style, variant = 'default' }: ButtonProps) {
+  const handlePress = () => {
+    if (disabled) return;
+    
+    // Provide standard iOS/Android haptic feedback on button interaction
+    if (variant === 'danger') {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    } else {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    
+    onPress();
+  };
+
   return (
     <Pressable
-      onPress={onPress}
+      onPress={handlePress}
       disabled={disabled}
       style={({ pressed }) => [
         styles.base,
@@ -30,7 +44,7 @@ export function Button({ title, onPress, disabled, style, variant = 'default' }:
         style,
       ]}
     >
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, variant !== 'default' && { color: '#ffffff' }]}>{title}</Text>
     </Pressable>
   );
 }
@@ -41,15 +55,18 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 14,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     color: '#052e16',
     fontWeight: '700',
+    fontSize: 16,
   },
   disabled: {
     opacity: 0.5,
   },
   pressed: {
-    transform: [{ scale: 0.99 }],
+    transform: [{ scale: 0.97 }],
+    opacity: 0.9,
   },
 });
