@@ -3,8 +3,8 @@
 ## v1 Requirements
 
 ### Core Architecture
-- [ ] **CORE-01**: User can spawn and manage the Java Minecraft Server natively on Android.
-- [ ] **CORE-02**: User can minimize the app without the server being abruptly killed by Android (Background Service).
+- [x] **CORE-01**: User can spawn and manage the Java Minecraft Server natively on Android.
+- [x] **CORE-02**: User can minimize the app without the server being abruptly killed by Android (Background Service).
 - [ ] **CORE-03**: User can cleanly stop the server process.
 
 ### Dashboard Core
