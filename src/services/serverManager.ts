@@ -1,4 +1,5 @@
 import { NativeEventEmitter } from 'react-native';
+import * as FileSystem from 'expo-file-system';
 import ServerProcessModule from '../../modules/server-process';
 import { useServerStore } from '../store/serverStore';
 import { downloadAssets } from './downloadService';
@@ -52,7 +53,11 @@ export const serverManager = {
       const serverDir = await downloadAssets();
       useServerStore.getState().actions.addLog('Assets ready. Starting native process...');
       
-      ServerProcessModule.startServer();
+      const { memoryLimit, activeWorld } = useServerStore.getState().config;
+      const jarPath = serverDir + 'server.jar';
+      const worldDir = serverDir + activeWorld + '/';
+
+      ServerProcessModule.startServer(jarPath, memoryLimit, worldDir);
     } catch (e: any) {
       useServerStore.getState().actions.setError(e.message || 'Failed to start server');
     }
