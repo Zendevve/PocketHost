@@ -6,11 +6,14 @@ interface ServerState {
   status: ServerStatus;
   logs: string[];
   errorMessage: string | null;
+  playitClaimUrl: string | null;
+  playitAddress: string | null;
   actions: {
     setStatus: (status: ServerStatus) => void;
     addLog: (line: string) => void;
     setError: (msg: string | null) => void;
     clearLogs: () => void;
+    setPlayitProperty: (key: 'playitClaimUrl' | 'playitAddress', value: string | null) => void;
   };
 }
 
@@ -20,6 +23,8 @@ export const useServerStore = create<ServerState>((set) => ({
   status: 'idle',
   logs: [],
   errorMessage: null,
+  playitClaimUrl: null,
+  playitAddress: null,
   actions: {
     setStatus: (status) => set({ status }),
     addLog: (line) =>
@@ -27,6 +32,7 @@ export const useServerStore = create<ServerState>((set) => ({
         logs: [...state.logs.slice(-(MAX_LOGS - 1)), line],
       })),
     setError: (msg) => set({ errorMessage: msg, status: 'error' }),
-    clearLogs: () => set({ logs: [], errorMessage: null }),
+    clearLogs: () => set({ logs: [], errorMessage: null, playitClaimUrl: null, playitAddress: null }),
+    setPlayitProperty: (key, value) => set({ [key]: value }),
   },
 }));
