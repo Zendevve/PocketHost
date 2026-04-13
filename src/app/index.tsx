@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator, Linking } from 'react-native';
 import { Console } from '../components/ui/Console';
 import { serverManager } from '../services/serverManager';
 import { useServerStore } from '../store/serverStore';
@@ -7,6 +7,8 @@ import { useServerStore } from '../store/serverStore';
 export default function Dashboard() {
   const status = useServerStore(state => state.status);
   const errorMessage = useServerStore(state => state.errorMessage);
+  const playitClaimUrl = useServerStore(state => state.playitClaimUrl);
+  const playitAddress = useServerStore(state => state.playitAddress);
 
   useEffect(() => {
     serverManager.initializeEventListeners();
@@ -50,6 +52,22 @@ export default function Dashboard() {
             </Text>
           )}
         </TouchableOpacity>
+
+        {playitClaimUrl && !playitAddress && (
+          <TouchableOpacity 
+            style={styles.claimButton}
+            onPress={() => Linking.openURL(playitClaimUrl)}
+          >
+            <Text style={styles.claimButtonText}>Claim Your Network Tunnel</Text>
+          </TouchableOpacity>
+        )}
+
+        {playitAddress && (
+          <View style={styles.ipContainer}>
+            <Text style={styles.ipLabel}>Public IP:</Text>
+            <Text style={styles.ipAddress} selectable={true}>{playitAddress}</Text>
+          </View>
+        )}
       </View>
       
       {errorMessage && (
@@ -105,7 +123,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     flexDirection: 'row',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    marginBottom: 10,
   },
   buttonDisabled: {
     backgroundColor: '#55aa55',
@@ -114,6 +133,38 @@ const styles = StyleSheet.create({
     color: '#000',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  claimButton: {
+    backgroundColor: '#007AFF',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  claimButtonText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  ipContainer: {
+    backgroundColor: '#1E1E1E',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 5,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  ipLabel: {
+    color: '#AAA',
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  ipAddress: {
+    color: '#00FF00',
+    fontSize: 18,
+    fontWeight: 'bold',
+    letterSpacing: 1,
   },
   errorContainer: {
     backgroundColor: 'rgba(255, 0, 0, 0.2)',
