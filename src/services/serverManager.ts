@@ -1,104 +1,54 @@
-import ServerProcess from '../../modules/server-process/src';
-import { useServerStore } from '../stores/serverStore';
-import { useSettingsStore } from '../stores/settingsStore';
-import { ServerConfig } from '../types/server';
-import { playitService } from './playitService';
+import { NativeEventEmitter } from 'react-native';
+import ServerProcessModule from '../../modules/server-process';
+import { useServerStore } from '../store/serverStore';
+import { downloadAssets } from './downloadService';
 
-class ServerManager {
-  private activeId: string | null = null;
-  private unsubscribeLogs: (() => void) | null = null;
-  private unsubscribeStatus: (() => void) | null = null;
-  private unsubscribeError: (() => void) | null = null;
+const emitter = new NativeEventEmitter(ServerProcessModule);
 
-  init() {
-    this.unsubscribeLogs?.();
-    this.unsubscribeStatus?.();
-    this.unsubscribeError?.();
+export const serverManager = {
+  initializeEventListeners: () => {
+    // Prevent duplicate listeners
+    emitter.removeAllListeners('onLog');
+    emitter.removeAllListeners('onStatusChange');
+    emitter.removeAllListeners('onError');
 
-    this.unsubscribeLogs = ServerProcess.addListener('onLog', (event: any) => {
-      if (this.activeId) {
-        useServerStore.getState().appendLog(this.activeId, event.line);
+    emitter.addListener('onLog', (event: { log: string }) => {
+      useServerStore.getState().actions.addLog(event.log);
+    });
+
+    emitter.addListener('onStatusChange', (event: { status: string }) => {
+      if (event.status === 'RUNNING') {
+        useServerStore.getState().actions.setStatus('running');
+      } else if (event.status === 'STOPPED') {
+        useServerStore.getState().actions.setStatus('idle');
       }
-    }).remove;
+    });
 
-    this.unsubscribeStatus = ServerProcess.addListener('onStatusChange', (event: any) => {
-      if (this.activeId) {
-        useServerStore.getState().setStatus(this.activeId, {
-          status: event.status,
-        });
+    emitter.addListener('onError', (event: { message: string }) => {
+      useServerStore.getState().actions.setError(event.message);
+    });
+  },
 
-        // If the server just became running, initialize playit if configured
-        if (event.status === 'running') {
-          const { playitSecretKey } = useSettingsStore.getState();
-          if (playitSecretKey) {
-            playitService.setupPlayitAgent(playitSecretKey).then(address => {
-               useServerStore.getState().setStatus(this.activeId!, { relayAddress: address });
-            }).catch(err => {
-              useServerStore.getState().appendLog(this.activeId!, `[Playit Error] ${err}`);
-            });
-          }
-        } else if (event.status === 'idle') {
-          playitService.stopPlayitAgent();
-          useServerStore.getState().setStatus(this.activeId, { relayAddress: null });
-        }
-      }
-    }).remove;
-
-    this.unsubscribeError = ServerProcess.addListener('onError', (event: any) => {
-      if (this.activeId) {
-        useServerStore.getState().setStatus(this.activeId, {
-          status: 'error',
-          error: event.message,
-        });
-      }
-    }).remove;
-  }
-
-  async start(config: ServerConfig): Promise<void> {
-    if (!this.unsubscribeLogs) {
-      this.init();
-    }
+  startServer: async () => {
+    useServerStore.getState().actions.setStatus('starting');
+    useServerStore.getState().actions.clearLogs();
     
-    this.activeId = config.id;
-    useServerStore.getState().setActive(config.id);
-    useServerStore.getState().clearLogs(config.id);
-    useServerStore.getState().setStatus(config.id, { status: 'starting', error: null, relayAddress: null });
-
     try {
-      await ServerProcess.startServer(
-        config.serverJarPath,
-        config.maxMemoryMB,
-        config.worldPath
-      );
-    } catch (e) {
-      useServerStore.getState().setStatus(config.id, { status: 'error', error: String(e) });
+      useServerStore.getState().actions.addLog('Ensuring assets are ready...');
+      const serverDir = await downloadAssets();
+      useServerStore.getState().actions.addLog('Assets ready. Starting native process...');
+      
+      ServerProcessModule.startServer();
+    } catch (e: any) {
+      useServerStore.getState().actions.setError(e.message || 'Failed to start server');
     }
-  }
+  },
 
-  async stop(): Promise<void> {
-    if (!this.activeId) return;
-    useServerStore.getState().setStatus(this.activeId, { status: 'stopping' });
-    try {
-      await ServerProcess.stopServer();
-      await playitService.stopPlayitAgent();
-    } catch (e) {
-      useServerStore.getState().setStatus(this.activeId, { status: 'error', error: String(e) });
-    }
-  }
+  stopServer: () => {
+    ServerProcessModule.stopServer();
+  },
 
-  async restart(config: ServerConfig): Promise<void> {
-    await this.stop();
-    await new Promise((r) => setTimeout(r, 2000));
-    await this.start(config);
+  sendCommand: (command: string) => {
+    ServerProcessModule.sendCommand(command);
   }
-
-  async sendCommand(command: string): Promise<void> {
-    await ServerProcess.sendCommand(command);
-  }
-
-  isRunning(): boolean {
-    return ServerProcess.isRunning();
-  }
-}
-
-export const serverManager = new ServerManager();
+};
