@@ -1,14 +1,11 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator, Linking } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator, Linking, TextInput } from 'react-native';
 import { Console } from '../components/ui/Console';
 import { serverManager } from '../services/serverManager';
 import { useServerStore } from '../store/serverStore';
 
 export default function Dashboard() {
-  const status = useServerStore(state => state.status);
-  const errorMessage = useServerStore(state => state.errorMessage);
-  const playitClaimUrl = useServerStore(state => state.playitClaimUrl);
-  const playitAddress = useServerStore(state => state.playitAddress);
+  const { status, errorMessage, playitClaimUrl, playitAddress, config, actions } = useServerStore(state => state);
 
   useEffect(() => {
     serverManager.initializeEventListeners();
@@ -25,6 +22,11 @@ export default function Dashboard() {
     }
   };
 
+  const handleMemoryChange = (amount: number) => {
+    const newMem = Math.max(512, Math.min(4096, config.memoryLimit + amount));
+    actions.updateConfig({ memoryLimit: newMem });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -35,6 +37,31 @@ export default function Dashboard() {
             { backgroundColor: status === 'running' ? '#00FF00' : (status === 'starting' ? '#FFA500' : '#FF0000') }
           ]} />
           <Text style={styles.statusText}>{status.toUpperCase()}</Text>
+        </View>
+      </View>
+
+      <View style={styles.settingsRow} pointerEvents={status === 'idle' ? 'auto' : 'none'}>
+        <View style={[styles.settingBlock, status !== 'idle' && styles.settingDisabled]}>
+          <Text style={styles.settingLabel}>Active World</Text>
+          <TextInput 
+            style={styles.textInput}
+            value={config.activeWorld}
+            onChangeText={(text) => actions.updateConfig({ activeWorld: text })}
+            placeholder="world"
+            placeholderTextColor="#666"
+          />
+        </View>
+        <View style={[styles.settingBlock, status !== 'idle' && styles.settingDisabled]}>
+          <Text style={styles.settingLabel}>Memory Limit</Text>
+          <View style={styles.stepperContainer}>
+            <TouchableOpacity style={styles.stepperButton} onPress={() => handleMemoryChange(-512)}>
+              <Text style={styles.stepperButtonText}>-</Text>
+            </TouchableOpacity>
+            <Text style={styles.stepperValue}>{config.memoryLimit} MB</Text>
+            <TouchableOpacity style={styles.stepperButton} onPress={() => handleMemoryChange(512)}>
+              <Text style={styles.stepperButtonText}>+</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -112,6 +139,57 @@ const styles = StyleSheet.create({
   },
   statusText: {
     color: '#AAA',
+    fontWeight: 'bold',
+  },
+  settingsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  settingBlock: {
+    flex: 1,
+    backgroundColor: '#1E1E1E',
+    padding: 12,
+    borderRadius: 8,
+    marginHorizontal: 4,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  settingDisabled: {
+    opacity: 0.5,
+  },
+  settingLabel: {
+    color: '#AAA',
+    fontSize: 12,
+    marginBottom: 8,
+  },
+  textInput: {
+    backgroundColor: '#2A2A2A',
+    color: '#FFF',
+    padding: 8,
+    borderRadius: 6,
+    fontSize: 14,
+  },
+  stepperContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#2A2A2A',
+    borderRadius: 6,
+    paddingHorizontal: 4,
+  },
+  stepperButton: {
+    padding: 8,
+    paddingHorizontal: 12,
+  },
+  stepperButtonText: {
+    color: '#00FF00',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  stepperValue: {
+    color: '#FFF',
+    fontSize: 14,
     fontWeight: 'bold',
   },
   controls: {
