@@ -14,6 +14,20 @@ export const serverManager = {
 
     emitter.addListener('onLog', (event: { log: string }) => {
       useServerStore.getState().actions.addLog(event.log);
+      
+      if (event.log.includes('https://playit.gg/claim/')) {
+        const match = event.log.match(/(https:\/\/playit\.gg\/claim\/[a-zA-Z0-9]+)/);
+        if (match) {
+          useServerStore.getState().actions.setPlayitProperty('playitClaimUrl', match[1]);
+        }
+      }
+
+      if (event.log.toLowerCase().includes('connected at:')) {
+        const ipMatch = event.log.match(/connected at:\s*([a-zA-Z0-9.-]+:[0-9]+)/i);
+        if (ipMatch) {
+          useServerStore.getState().actions.setPlayitProperty('playitAddress', ipMatch[1]);
+        }
+      }
     });
 
     emitter.addListener('onStatusChange', (event: { status: string }) => {
