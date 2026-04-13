@@ -21,7 +21,10 @@
 - [ ] **NET-02**: User receives a copyable remote join-address when the server boots successfully.
 
 ## Traceability
-*Mapped phases via ROADMAP*
+- **Phase 1**: CORE-01, CORE-02, CORE-03, DASH-01
+- **Phase 2**: NET-01, NET-02
+- **Phase 3**: DASH-02, DASH-03
+- **Phase 4**: PLUG-01, PLUG-02
 
 ## v2 Requirements (Deferred)
 - Automatic snapshotting/backups to Google Drive or local storage.
