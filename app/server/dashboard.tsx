@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Text, View } from 'react-native';
+import { Text, View, StyleSheet } from 'react-native';
 import { Button } from '../../src/components/ui/Button';
 import { Card } from '../../src/components/ui/Card';
 import { theme } from '../../src/lib/theme';
@@ -7,7 +7,7 @@ import { useServerStore } from '../../src/stores/serverStore';
 
 export default function ServerDashboardScreen() {
   const router = useRouter();
-  const { configs, activeServerId, statuses } = useServerStore();
+  const { configs, activeServerId, statuses, backupStatus, lastBackupTime } = useServerStore();
   const activeConfig = configs.find((c) => c.id === activeServerId);
   const activeState = activeServerId ? statuses[activeServerId] : null;
 
@@ -46,6 +46,26 @@ export default function ServerDashboardScreen() {
         <Text style={theme.subtext}>TPS: {activeState?.tps || 20}</Text>
       </Card>
 
+      {/* Backup Status Indicator */}
+      <View style={styles.backupStatusContainer}>
+        <Text style={styles.backupStatusLabel}>Backup:</Text>
+        {backupStatus === 'idle' && lastBackupTime && (
+          <Text style={styles.backupStatusReady}>Ready (last: {new Date(lastBackupTime).toLocaleDateString()})</Text>
+        )}
+        {backupStatus === 'idle' && !lastBackupTime && (
+          <Text style={styles.backupStatusReady}>Ready</Text>
+        )}
+        {backupStatus === 'creating' && (
+          <Text style={styles.backupStatusBusy}>Creating backup...</Text>
+        )}
+        {backupStatus === 'restoring' && (
+          <Text style={styles.backupStatusBusy}>Restoring backup...</Text>
+        )}
+        {backupStatus === 'error' && (
+          <Text style={styles.backupStatusError}>Error</Text>
+        )}
+      </View>
+
       <Button
         title="Open Console"
         onPress={() => router.push('/server/console')}
@@ -64,9 +84,15 @@ export default function ServerDashboardScreen() {
         style={{ marginBottom: 12 }}
       />
       <Button
-        title="Worlds & Backups"
+        title="Worlds"
         variant="secondary"
         onPress={() => router.push('/worlds')}
+        style={{ marginBottom: 12 }}
+      />
+      <Button
+        title="Backups"
+        variant="secondary"
+        onPress={() => router.push('/backup')}
         style={{ marginBottom: 12 }}
       />
       <Button
@@ -78,3 +104,31 @@ export default function ServerDashboardScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  backupStatusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  backupStatusLabel: {
+    color: theme.colors.textMuted,
+    fontSize: 13,
+    marginRight: 6,
+  },
+  backupStatusReady: {
+    color: theme.colors.primary,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  backupStatusBusy: {
+    color: '#f59e0b',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  backupStatusError: {
+    color: theme.colors.danger,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+});

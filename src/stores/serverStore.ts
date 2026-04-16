@@ -8,6 +8,9 @@ interface ServerStore {
   activeServerId: string | null;
   statuses: Record<string, ServerState>;
   consoleLogs: Record<string, string[]>;
+  backupStatus: 'idle' | 'creating' | 'restoring' | 'error';
+  lastBackupTime: string | null;
+  backupError: string | null;
 
   addConfig: (config: ServerConfig) => void;
   removeConfig: (id: string) => void;
@@ -15,6 +18,9 @@ interface ServerStore {
   setStatus: (id: string, partial: Partial<ServerState>) => void;
   appendLog: (id: string, line: string) => void;
   clearLogs: (id: string) => void;
+  setBackupStatus: (status: 'idle' | 'creating' | 'restoring' | 'error') => void;
+  setLastBackup: (time: string | null) => void;
+  setBackupError: (msg: string | null) => void;
   reset: () => void;
 }
 
@@ -25,6 +31,9 @@ export const useServerStore = create<ServerStore>()(
       activeServerId: null,
       statuses: {},
       consoleLogs: {},
+      backupStatus: 'idle',
+      lastBackupTime: null,
+      backupError: null,
 
       addConfig: (config) =>
         set((s) => ({
@@ -90,12 +99,21 @@ export const useServerStore = create<ServerStore>()(
           },
         })),
 
+      setBackupStatus: (status) => set({ backupStatus: status }),
+
+      setLastBackup: (time) => set({ lastBackupTime: time }),
+
+      setBackupError: (msg) => set({ backupError: msg }),
+
       reset: () =>
         set({
           configs: [],
           activeServerId: null,
           statuses: {},
           consoleLogs: {},
+          backupStatus: 'idle',
+          lastBackupTime: null,
+          backupError: null,
         }),
     }),
     {
