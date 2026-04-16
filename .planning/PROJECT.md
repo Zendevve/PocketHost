@@ -15,6 +15,7 @@ Making Minecraft server hosting feel like a native mobile experience. It trades 
 - ✓ **Core Server Execution**: Spawning and managing a Minecraft Server child process natively on Android.
 - ✓ **Relay Access**: Initial Playit.gg integrations to expose the local server to the broader internet.
 - ✓ **UI Foundation**: A React Native (Expo) shell utilizing Zustand for bridging native server events (logs, status) to the UI.
+- ✓ **Plugin Management**: Admins can install .jar plugins via file picker, edit YAML configs, and reload plugins without restart. (PLUG-01, PLUG-02 — validated in Phase 4)
 
 ### Active
 
@@ -33,9 +34,9 @@ Making Minecraft server hosting feel like a native mobile experience. It trades 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
 | **Focus on Background Stability FIRST** | An Android system will relentlessly kill the host app when minimized. If the server cannot survive being in the background, the app's fundamental utility is broken. | — Pending |
-
 ---
-*Last updated: 2026-04-13 after initialization*
+
+*Last updated: 2026-04-16 after Phase 4 (Plugins & Expansion) completion*
 
 ## Evolution
 
