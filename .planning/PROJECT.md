@@ -30,10 +30,11 @@ Making Minecraft server hosting feel like a native mobile experience. It trades 
   - Live console streaming, memory allocation slider, and world selection implemented.
 - ✓ **Plugin Management** (PLUG-01, PLUG-02) — v1.0
   - .jar import via file picker, YAML config editing, plugin enable/disable, and reload command delivered.
+- ✓ **Backup & Restore** (BACK-01, BACK-02, BACK-03, BACK-04, BACK-05) — v1.1 Phase 5
+  - Full backup creation (ZIP), history persisted via AsyncStorage; restore with dual-confirmation (dialog + world name), automatic server stop/start, integrity validation (ZIP and world), rollback on failure, and progress UI.
 
 ### Active
 
-- [ ] **Backup & Restore**: Implement world zipping and restoration workflows.
 - [ ] **Nested Config Editor**: Support complex YAML structures in plugin config UI.
 - [ ] **Plugin Metadata**: Display plugin name, version, author from JAR descriptor.
 
@@ -52,11 +53,12 @@ Making Minecraft server hosting feel like a native mobile experience. It trades 
 - External connectivity established — users receive join address.
 - Memory allocation (up to 4GB) and world selection operational.
 - Plugin lifecycle complete — install, enable/disable, config edit, reload.
+- World backup & restore system — ZIP creation, history persistence, dual-confirmation restore with automatic server stop/start, validation, progress feedback.
 
 **Known Issues & Technical Debt:**
 - CORE-03 (clean stop) not formally verified; relies on UI stop button.
 - Config editor limited to flat key-value pairs; nested structures deferred.
-- Plugin metadata extraction stubbed pending ZIP library.
+- Plugin metadata extraction pending (ZIP library now in place).
 - Some TypeScript workarounds: `any` casts in `serverManager.ts` for missing native typings.
 - VALIDATION.md checklists contain unchecked manual tests.
 
@@ -79,9 +81,10 @@ Making Minecraft server hosting feel like a native mobile experience. It trades 
 | **Choose js-yaml for YAML configs** | Proven library; supports common plugin config formats. | ✓ Good — Config round-trips correctly; no format issues. |
 | **Flat key-value config editor only** | Nested objects require more UI work; defer to keep Phase 4 scope tight. | ✓ Good — Covers majority of plugin configs; nested planned for v1.1. |
 | **Defer plugin metadata extraction** | Requires ZIP/JAR parsing library; out of scope for core plugin management. | ⚠️ Revisit — Add metadata reader in next milestone using ` admzip ` or similar. |
+| **Adm-zip for ZIP operations** | JS ZIP library compatible with React Native (base64) | ✓ Good — Backups created and restored successfully with validation |
 ---
 
-*Last updated: 2026-04-16 after v1.0 milestone completion → defining v1.1 "Backup & Polish"*
+*Last updated: 2026-04-16 after Phase 5 (Backup Foundation) completion*
 
 ## Evolution
 
