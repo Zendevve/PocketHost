@@ -9,6 +9,7 @@ import { ConsoleOutput } from '../../src/components/console/ConsoleOutput';
 export default function ConsoleScreen() {
   const activeServerId = useServerStore(s => s.activeServerId);
   const logs = useServerStore(s => activeServerId ? (s.consoleLogs[activeServerId] ?? []) : []);
+  const status = useServerStore(s => activeServerId ? s.statuses[activeServerId]?.status : 'idle');
   const flatRef = useRef<FlatList>(null);
 
   useEffect(() => {
@@ -22,10 +23,12 @@ export default function ConsoleScreen() {
     
     useServerStore.getState().appendLog(activeServerId, `> ${cmd}`);
     
-    if (serverManager.isRunning()) {
-      serverManager.sendCommand(cmd).catch(e => {
+    if (status === 'running') {
+      try {
+        serverManager.sendCommand(cmd);
+      } catch (e: any) {
         useServerStore.getState().appendLog(activeServerId, `[ERROR] Failed to send command: ${e.message}`);
-      });
+      }
     } else {
       useServerStore.getState().appendLog(activeServerId, `[WARN] Cannot execute command. Server is not running.`);
     }

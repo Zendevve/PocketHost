@@ -9,9 +9,10 @@ export const colors = {
   primary: '#4ade80',
   primaryDark: '#16a34a',
   danger: '#ef4444',
+  surfaceHover: '#262626',
 };
 
-export const theme = StyleSheet.create({
+const baseTheme = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.bg,
@@ -33,6 +34,12 @@ export const theme = StyleSheet.create({
     fontSize: 13,
     marginTop: 4,
   },
+  // Legacy alias: code using theme.caption maps to subtext styling
+  caption: {
+    color: colors.textMuted,
+    fontSize: 12,
+    marginTop: 2,
+  },
   card: {
     backgroundColor: colors.surface,
     borderRadius: 12,
@@ -42,3 +49,9 @@ export const theme = StyleSheet.create({
     marginBottom: 12,
   },
 });
+
+// Merge colors into the theme object so consumers can use theme.colors.primary, etc.
+export const theme = {
+  ...baseTheme,
+  colors,
+};

@@ -4,7 +4,8 @@ import ServerProcessModule from '../../modules/server-process';
 import { useServerStore } from '../store/serverStore';
 import { downloadAssets } from './downloadService';
 
-const emitter = new NativeEventEmitter(ServerProcessModule);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const emitter = new NativeEventEmitter(ServerProcessModule as any);
 
 export const serverManager = {
   initializeEventListeners: () => {

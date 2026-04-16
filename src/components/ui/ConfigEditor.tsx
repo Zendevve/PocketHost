@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { View, Text, ScrollView, Alert } from 'react-native';
 import { Input } from './Input';
 import { Button } from './Button';
 import { theme } from '../../lib/theme';
+import { writePluginConfig } from '../../services/pluginConfigManager';
 
 interface ConfigEditorProps {
   initialConfig: Record<string, unknown>;
@@ -27,10 +28,8 @@ export function ConfigEditor({ initialConfig, configPath, onSaved }: ConfigEdito
   const handleSave = async () => {
     setSaving(true);
     try {
-      const { writePluginConfig } = await import('../services/pluginConfigManager');
       const parsedConfig: Record<string, unknown> = {};
       for (const [k, v] of Object.entries(config)) {
-        // Attempt to parse as JSON if looks like array/object, else keep string
         const trimmed = v.trim();
         if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
           try {

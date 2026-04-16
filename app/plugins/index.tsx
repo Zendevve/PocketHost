@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Alert, ActivityIndicator, StyleSheet } from 're
 import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
-import { theme } from '../../src/lib/theme';
+import { theme, colors } from '../../src/lib/theme';
 import { useServerStore } from '../../src/stores/serverStore';
 import { Card } from '../../src/components/ui/Card';
 import { Button } from '../../src/components/ui/Button';
@@ -44,12 +44,20 @@ export default function PluginsScreen() {
         .filter(f => f.endsWith('.jar') || f.endsWith('.jar.disabled'))
         .map(async (file) => {
           const path = `${pluginsDir}/${file}`;
-          const fileInfo = await FileSystem.getInfoAsync(path);
+          const fileInfo = await FileSystem.getInfoAsync(path, { size: true });
+          if (!fileInfo.exists) {
+            return {
+              name: file.replace('.jar.disabled', '').replace('.jar', ''),
+              path,
+              enabled: !file.endsWith('.disabled'),
+              size: 0,
+            };
+          }
           return {
             name: file.replace('.jar.disabled', '').replace('.jar', ''),
             path,
             enabled: !file.endsWith('.disabled'),
-            size: fileInfo.size || 0,
+            size: fileInfo.size,
           };
         });
          
@@ -174,13 +182,13 @@ export default function PluginsScreen() {
     );
   }
 
-  if (loading) {
-    return (
-      <View style={[theme.screen, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator color={theme.colors.primary} size="large" />
-      </View>
-    );
-  }
+   if (loading) {
+     return (
+       <View style={[theme.screen, { justifyContent: 'center', alignItems: 'center' }]}>
+         <ActivityIndicator color={colors.primary} size="large" />
+       </View>
+     );
+   }
 
   return (
     <ScrollView style={theme.screen} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -196,8 +204,7 @@ export default function PluginsScreen() {
         <Card>
           <Text style={theme.body}>No plugins found in the plugins directory.</Text>
         </Card>
-      ) : (
-        plugins.map((plugin) => (
+       ) : plugins.map((plugin) => (
           <Card key={plugin.path} style={styles.pluginCard}>
             <View style={styles.pluginInfo}>
               <Link href={`/plugins/${encodeURIComponent(plugin.name)}`} style={{ textDecorationLine: 'none' }}>
@@ -205,7 +212,7 @@ export default function PluginsScreen() {
                   {plugin.name}
                 </Text>
               </Link>
-              <Text style={theme.caption}>Size: {(plugin.size / 1024 / 1024).toFixed(2)} MB</Text>
+               <Text style={theme.subtext}>Size: {(plugin.size / 1024 / 1024).toFixed(2)} MB</Text>
             </View>
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <Button 

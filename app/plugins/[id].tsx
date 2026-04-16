@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, ScrollView, Alert, ActivityIndicator, StyleSheet, Linking } from 'react-native';
+import { View, Text, ScrollView, Alert, ActivityIndicator, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as FileSystem from 'expo-file-system';
 import { Card } from '../../src/components/ui/Card';
@@ -8,7 +8,7 @@ import { ConfigEditor } from '../../src/components/ui/ConfigEditor';
 import { useServerStore } from '../../src/stores/serverStore';
 import { serverManager } from '../../src/services/serverManager';
 import { getPluginConfigPath, readPluginConfig, findPluginConfigPath } from '../../src/services/pluginConfigManager';
-import { theme } from '../../src/lib/theme';
+import { colors, theme } from '../../src/lib/theme';
 
 interface PluginInfo {
   name: string;
@@ -34,7 +34,6 @@ export default function PluginDetailScreen() {
     const pluginsDir = `file://${config.worldPath}/plugins`;
     try {
       const files = await FileSystem.readDirectoryAsync(pluginsDir);
-      // Find plugin file that matches the id (slugified name)
       const match = files.find(f => {
         const base = f.replace(/\.jar(\.disabled)?$/, '');
         return base === id;
@@ -45,12 +44,17 @@ export default function PluginDetailScreen() {
         return;
       }
       const fullPath = `${pluginsDir}/${match}`;
-      const info = await FileSystem.getInfoAsync(fullPath);
+      const info = await FileSystem.getInfoAsync(fullPath, { size: true });
+      if (!info.exists) {
+        Alert.alert('Not found', 'Plugin file missing.');
+        router.back();
+        return;
+      }
       setPlugin({
         name: id,
         path: fullPath,
         enabled: !match.endsWith('.disabled'),
-        size: info.size || 0,
+        size: info.size,
       });
 
       // Look for config
@@ -85,7 +89,7 @@ export default function PluginDetailScreen() {
   if (loading) {
     return (
       <View style={[theme.screen, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator color={theme.colors.primary} size="large" />
+        <ActivityIndicator color={colors.primary} size="large" />
       </View>
     );
   }
@@ -103,7 +107,7 @@ export default function PluginDetailScreen() {
     <ScrollView style={theme.screen} contentContainerStyle={{ paddingBottom: 40 }}>
       <Text style={theme.heading}>{plugin.name}</Text>
       <Text style={theme.body}>Size: {(plugin.size / 1024 / 1024).toFixed(2)} MB</Text>
-      <Text style={[theme.body, { color: plugin.enabled ? theme.colors.primary : theme.colors.textMuted }]}>
+      <Text style={[theme.body, { color: plugin.enabled ? colors.primary : colors.textMuted }]}>
         Status: {plugin.enabled ? 'Enabled' : 'Disabled'}
       </Text>
 

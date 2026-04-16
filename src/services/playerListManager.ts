@@ -1,5 +1,5 @@
 import * as FileSystem from 'expo-file-system';
-import { ServerProcess } from '../../modules/server-process/src';
+import ServerProcess from '../../modules/server-process';
 
 export interface PlayerListEntry {
   uuid: string;
