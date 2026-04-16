@@ -8,6 +8,16 @@ PocketHost is an Android app that turns a user's mobile device into a lightweigh
 
 Making Minecraft server hosting feel like a native mobile experience. It trades the complexity of desktop administration for simple setup, clear dashboard controls, and practical, on-the-go admin tools.
 
+## Current Milestone: v1.1 Backup & Polish
+
+**Goal:** Users can backup and restore server worlds, and plugin management gains nested config editing + metadata display.
+
+**Target features:**
+- World backup: zip world folder, download to device, cloud backup option
+- World restore: pick backup file, extract over current world (with safety prompts)
+- Nested YAML config editor — support objects and arrays in plugin configs
+- Plugin metadata reader — extract name, version, author from plugin JARs
+
 ## Requirements
 
 ### Validated
@@ -24,7 +34,8 @@ Making Minecraft server hosting feel like a native mobile experience. It trades 
 ### Active
 
 - [ ] **Backup & Restore**: Implement world zipping and restoration workflows.
-- [ ] **Network Resilience**: Harden against Playit downtimes, CGNAT errors, and connection drops.
+- [ ] **Nested Config Editor**: Support complex YAML structures in plugin config UI.
+- [ ] **Plugin Metadata**: Display plugin name, version, author from JAR descriptor.
 
 ### Out of Scope
 
@@ -70,7 +81,7 @@ Making Minecraft server hosting feel like a native mobile experience. It trades 
 | **Defer plugin metadata extraction** | Requires ZIP/JAR parsing library; out of scope for core plugin management. | ⚠️ Revisit — Add metadata reader in next milestone using ` admzip ` or similar. |
 ---
 
-*Last updated: 2026-04-16 after v1.0 milestone completion*
+*Last updated: 2026-04-16 after v1.0 milestone completion → defining v1.1 "Backup & Polish"*
 
 ## Evolution
 
