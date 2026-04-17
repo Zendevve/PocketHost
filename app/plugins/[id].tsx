@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as FileSystem from 'expo-file-system';
 import { Card } from '../../src/components/ui/Card';
 import { Button } from '../../src/components/ui/Button';
-import { ConfigEditor } from '../../src/components/ui/ConfigEditor';
+import { ConfigTreeEditor } from '../../src/components/ui/ConfigTreeEditor';
 import { useServerStore } from '../../src/stores/serverStore';
 import { serverManager } from '../../src/services/serverManager';
 import { getPluginConfigPath, readPluginConfig, findPluginConfigPath } from '../../src/services/pluginConfigManager';
@@ -115,11 +115,10 @@ export default function PluginDetailScreen() {
         <>
           <Text style={[theme.subtext, { marginTop: 12 }]}>Configuration</Text>
           <Card>
-            <ConfigEditor
+            <ConfigTreeEditor
               initialConfig={configData}
               configPath={configPath}
               onSaved={() => {
-                // Optionally refresh config from disk after save
                 loadPluginAndConfig();
               }}
             />
