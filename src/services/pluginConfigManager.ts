@@ -1,11 +1,22 @@
 import * as FileSystem from 'expo-file-system';
 import yaml from 'js-yaml';
+import AdmZip from 'adm-zip';
 
 /**
  * PluginConfigManager — handles plugin configuration discovery, read/write, and metadata extraction.
  *
  * Pattern: Follows propertiesManager.ts for file I/O conventions.
  */
+
+/**
+ * PluginMetadata extracted from JAR plugin.yml or MANIFEST.MF
+ */
+export interface PluginMetadata {
+  name: string;
+  version?: string;
+  author?: string;
+  description?: string;
+}
 
 /**
  * Get the config file path for a plugin, if one exists.
@@ -88,17 +99,95 @@ export async function writePluginConfig(configPath: string, config: Record<strin
 }
 
 /**
- * Extract plugin metadata (name, version, author) from a plugin JAR file.
- * Reads plugin.yml from inside the JAR if present.
- * Returns null if no descriptor found.
- *
- * NOTE: React Native's FileSystem lacks native zip archive traversal. A full
- * implementation would require a ZIP parsing library (e.g. expo-zip) or a custom
- * central-directory reader. This stub returns null until such capability is added.
+ * Convert a file:// URI to a native filesystem path for adm-zip.
+ * Strips the 'file://' prefix. On non-URI paths, returns as-is.
  */
-export async function getPluginMetadata(_pluginPath: string): Promise<{ name: string; version?: string; author?: string } | null> {
-  // Not implementable without zip support. Derive name from filename as fallback elsewhere.
-  return null;
+function uriToNativePath(uri: string): string {
+  if (uri.startsWith('file://')) {
+    return uri.substring(7);
+  }
+  return uri;
+}
+
+/**
+ * Check if a JAR file is corrupted or unreadable.
+ */
+export async function isCorruptedJar(jarPath: string): Promise<boolean> {
+  try {
+    const nativePath = uriToNativePath(jarPath);
+    // Attempt to read the JAR with adm-zip
+    const zip = new AdmZip(nativePath);
+    // Check if we can read the central directory (basic validity)
+    const entries = zip.getEntries();
+    return entries.length === 0 && !zip.readAsTextAsync; // JAR is empty but not necessarily corrupted; pass through
+  } catch (e) {
+    console.warn(`isCorruptedJar: failed to read JAR at ${jarPath}:`, e);
+    return true;
+  }
+}
+
+/**
+ * Extract plugin metadata (name, version, author, description) from a plugin JAR file.
+ * Reads plugin.yml from inside the JAR if present.
+ * Falls back to META-INF/MANIFEST.MF for basic info.
+ * Returns null if no descriptor found or JAR is unreadable.
+ */
+export async function getPluginMetadata(pluginPath: string): Promise<PluginMetadata | null> {
+  try {
+    const nativePath = uriToNativePath(pluginPath);
+    const zip = new AdmZip(nativePath);
+
+    // Try reading plugin.yml first
+    const pluginYmlEntry = zip.getEntry('plugin.yml');
+    if (pluginYmlEntry) {
+      const ymlContent = zip.readAsText(pluginYmlEntry);
+      try {
+        const parsed = yaml.load(ymlContent) as Record<string, unknown>;
+        if (parsed) {
+          const metadata: PluginMetadata = {
+            name: parsed.name as string || '',
+            version: parsed.version as string | undefined,
+            author: parsed.author as string | undefined,
+            description: parsed.description as string | undefined,
+          };
+          if (metadata.name) {
+            return metadata;
+          }
+        }
+      } catch (e) {
+        console.warn(`Failed to parse plugin.yml from ${pluginPath}:`, e);
+        // Fall through to manifest fallback
+      }
+    }
+
+    // Fallback: try META-INF/MANIFEST.MF
+    const manifestEntry = zip.getEntry('META-INF/MANIFEST.MF');
+    if (manifestEntry) {
+      const manifestContent = zip.readAsText(manifestEntry);
+      const lines = manifestContent.split('\n');
+      const meta: Record<string, string> = {};
+      for (const line of lines) {
+        const idx = line.indexOf(':');
+        if (idx > 0) {
+          const key = line.substring(0, idx).trim();
+          const value = line.substring(idx + 1).trim();
+          meta[key] = value;
+        }
+      }
+      const name = meta['Implementation-Title'] || '';
+      const version = meta['Implementation-Version'];
+      const author = meta['Implementation-Vendor-Id'] || meta['Implementation-Vendor'];
+      if (name) {
+        return { name, version, author };
+      }
+    }
+
+    // No metadata found
+    return null;
+  } catch (e) {
+    console.error(`getPluginMetadata failed for ${pluginPath}:`, e);
+    return null;
+  }
 }
 
 /**

@@ -7,7 +7,7 @@ import { Button } from '../../src/components/ui/Button';
 import { ConfigTreeEditor } from '../../src/components/ui/ConfigTreeEditor';
 import { useServerStore } from '../../src/stores/serverStore';
 import { serverManager } from '../../src/services/serverManager';
-import { getPluginConfigPath, readPluginConfig, findPluginConfigPath } from '../../src/services/pluginConfigManager';
+import { getPluginConfigPath, readPluginConfig, findPluginConfigPath, getPluginMetadata, isCorruptedJar, PluginMetadata } from '../../src/services/pluginConfigManager';
 import { colors, theme } from '../../src/lib/theme';
 
 interface PluginInfo {
@@ -15,6 +15,8 @@ interface PluginInfo {
   path: string;
   enabled: boolean;
   size: number;
+  metadata?: PluginMetadata | null;
+  corrupted?: boolean;
 }
 
 export default function PluginDetailScreen() {
@@ -50,11 +52,18 @@ export default function PluginDetailScreen() {
         router.back();
         return;
       }
+      // Extract metadata and check corruption in parallel
+      const [metadata, corrupted] = await Promise.all([
+        getPluginMetadata(fullPath),
+        isCorruptedJar(fullPath),
+      ]);
       setPlugin({
         name: id,
         path: fullPath,
         enabled: !match.endsWith('.disabled'),
         size: info.size,
+        metadata: corrupted ? null : metadata,
+        corrupted,
       });
 
       // Look for config
@@ -80,6 +89,10 @@ export default function PluginDetailScreen() {
   }, [loadPluginAndConfig]);
 
   const handleReload = () => {
+    if (plugin?.corrupted) {
+      Alert.alert('Cannot Reload', 'Plugin is corrupted and cannot be reloaded.');
+      return;
+    }
     // Send reload command to server
     const cmd = `/reload ${plugin?.name || ''}`.trim();
     serverManager.sendCommand(cmd);
@@ -105,13 +118,35 @@ export default function PluginDetailScreen() {
 
   return (
     <ScrollView style={theme.screen} contentContainerStyle={{ paddingBottom: 40 }}>
-      <Text style={theme.heading}>{plugin.name}</Text>
-      <Text style={theme.body}>Size: {(plugin.size / 1024 / 1024).toFixed(2)} MB</Text>
-      <Text style={[theme.body, { color: plugin.enabled ? colors.primary : colors.textMuted }]}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <Text style={theme.heading}>{plugin.metadata?.name || plugin.name}</Text>
+        {plugin.corrupted && <Text style={{ fontSize: 20 }}>⚠️</Text>}
+      </View>
+      {plugin.metadata?.version && (
+        <Text style={theme.subtext}>Version: {plugin.metadata.version}</Text>
+      )}
+      {plugin.metadata?.author && (
+        <Text style={theme.subtext}>Author: {plugin.metadata.author}</Text>
+      )}
+      {plugin.metadata?.description && (
+        <Text style={[theme.body, { marginTop: 8 }]} numberOfLines={3}>
+          {plugin.metadata.description}
+        </Text>
+      )}
+      <Text style={[theme.body, { color: plugin.enabled ? colors.primary : colors.textMuted, marginTop: 8 }]}>
         Status: {plugin.enabled ? 'Enabled' : 'Disabled'}
       </Text>
+      <Text style={theme.subtext}>Size: {(plugin.size / 1024 / 1024).toFixed(2)} MB</Text>
 
-      {hasConfig && configPath ? (
+      {plugin.corrupted && (
+        <Card style={{ backgroundColor: '#3f1f1f', borderColor: colors.danger, marginTop: 16 }}>
+          <Text style={[theme.body, { color: colors.danger }]}>
+            ⚠️ This plugin JAR is corrupted or unreadable. It may not work correctly. Consider re-installing it.
+          </Text>
+        </Card>
+      )}
+
+      {hasConfig && configPath && !plugin.corrupted ? (
         <>
           <Text style={[theme.subtext, { marginTop: 12 }]}>Configuration</Text>
           <Card>
@@ -126,12 +161,19 @@ export default function PluginDetailScreen() {
         </>
       ) : (
         <Card style={{ marginTop: 12 }}>
-          <Text style={theme.body}>No configuration file found for this plugin.</Text>
+          <Text style={theme.body}>
+            {plugin.corrupted ? 'Configuration editor is disabled for corrupted plugins.' : 'No configuration file found for this plugin.'}
+          </Text>
         </Card>
       )}
 
       <View style={{ flexDirection: 'row', gap: 8, marginTop: 16 }}>
-        <Button title="Reload Plugin" onPress={handleReload} />
+        <Button 
+          title="Reload Plugin" 
+          onPress={handleReload} 
+          disabled={plugin.corrupted}
+          style={plugin.corrupted ? { opacity: 0.5 } : undefined}
+        />
         <Button title="Back" variant="secondary" onPress={() => router.back()} />
       </View>
     </ScrollView>

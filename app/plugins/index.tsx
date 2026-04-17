@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, ScrollView, Alert, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Alert, ActivityIndicator, StyleSheet, Pressable } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
@@ -8,12 +8,15 @@ import { useServerStore } from '../../src/stores/serverStore';
 import { Card } from '../../src/components/ui/Card';
 import { Button } from '../../src/components/ui/Button';
 import { Link } from 'expo-router';
+import { getPluginMetadata, isCorruptedJar, PluginMetadata } from '../../src/services/pluginConfigManager';
 
 interface PluginInfo {
   name: string;
   path: string;
   enabled: boolean;
   size: number;
+  metadata?: PluginMetadata | null;
+  corrupted?: boolean;
 }
 
 export default function PluginsScreen() {
@@ -51,16 +54,25 @@ export default function PluginsScreen() {
               path,
               enabled: !file.endsWith('.disabled'),
               size: 0,
+              metadata: null,
+              corrupted: false,
             };
           }
+          // Extract metadata in parallel
+          const [metadata, corrupted] = await Promise.all([
+            getPluginMetadata(path),
+            isCorruptedJar(path),
+          ]);
           return {
             name: file.replace('.jar.disabled', '').replace('.jar', ''),
             path,
             enabled: !file.endsWith('.disabled'),
             size: fileInfo.size,
+            metadata: corrupted ? null : metadata,
+            corrupted,
           };
         });
-         
+          
       const results = await Promise.all(pluginPromises);
       setPlugins(results.sort((a, b) => a.name.localeCompare(b.name)));
     } catch (e) {
@@ -71,63 +83,79 @@ export default function PluginsScreen() {
     setLoading(false);
   };
 
-  const handleImportPlugin = async () => {
-    if (!config?.worldPath) {
-      Alert.alert('Error', 'No server configured.');
-      return;
-    }
+   const handleImportPlugin = async () => {
+     if (!config?.worldPath) {
+       Alert.alert('Error', 'No server configured.');
+       return;
+     }
 
-    try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: 'application/java-archive',
-        copyToCacheDirectory: true,
-      });
+     try {
+       const result = await DocumentPicker.getDocumentAsync({
+         type: 'application/java-archive',
+         copyToCacheDirectory: true,
+       });
 
-      if (result.canceled || !result.assets || result.assets.length === 0) {
-        return;
-      }
+       if (result.canceled || !result.assets || result.assets.length === 0) {
+         return;
+       }
 
-      const asset = result.assets[0];
-      const pluginsDir = `${config.worldPath}/plugins`;
-      const destPath = `${pluginsDir}/${asset.name}`;
+       const asset = result.assets[0];
+       const pluginsDir = `${config.worldPath}/plugins`;
+       const destPath = `${pluginsDir}/${asset.name}`;
 
-      // Ensure plugins directory exists
-      const dirInfo = await FileSystem.getInfoAsync(pluginsDir);
-      if (!dirInfo.exists) {
-        await FileSystem.makeDirectoryAsync(pluginsDir, { intermediates: true });
-      }
+       // Ensure plugins directory exists
+       const dirInfo = await FileSystem.getInfoAsync(pluginsDir);
+       if (!dirInfo.exists) {
+         await FileSystem.makeDirectoryAsync(pluginsDir, { intermediates: true });
+       }
 
-      // Handle duplicate filename
-      const destInfo = await FileSystem.getInfoAsync(destPath);
-      if (destInfo.exists) {
-        const timestamp = Date.now();
-        const renamed = `${asset.name.replace('.jar', '')}-${timestamp}.jar`;
-        await FileSystem.copyAsync({
-          from: asset.uri,
-          to: `${pluginsDir}/${renamed}`,
-        });
-        Alert.alert('Imported', `Plugin saved as ${renamed}`);
-      } else {
-        await FileSystem.copyAsync({
-          from: asset.uri,
-          to: destPath,
-        });
-        Alert.alert('Imported', `Plugin ${asset.name} installed.`);
-      }
+       // Handle duplicate filename
+       let finalDestPath = destPath;
+       const destInfo = await FileSystem.getInfoAsync(destPath);
+       if (destInfo.exists) {
+         const timestamp = Date.now();
+         const renamed = `${asset.name.replace('.jar', '')}-${timestamp}.jar`;
+         finalDestPath = `${pluginsDir}/${renamed}`;
+         await FileSystem.copyAsync({
+           from: asset.uri,
+           to: finalDestPath,
+         });
+       } else {
+         await FileSystem.copyAsync({
+           from: asset.uri,
+           to: destPath,
+         });
+       }
 
-      // Refresh list
-      await fetchPlugins();
-    } catch (e: any) {
-      console.error('Import failed:', e);
-      Alert.alert('Import Error', e.message || 'Failed to import plugin.');
-    }
-  };
+       // Immediately check if the imported JAR is corrupted
+       const corrupted = await isCorruptedJar(finalDestPath);
+       if (corrupted) {
+         // Remove the corrupted file
+         await FileSystem.deleteAsync(finalDestPath, { idempotent: true });
+         Alert.alert('Import Failed', 'The plugin JAR appears to be corrupted or unreadable. Please obtain a valid plugin file.');
+         return;
+       }
+
+       // Success feedback
+       Alert.alert('Imported', `Plugin ${asset.name} installed successfully.`);
+
+       // Refresh list
+       await fetchPlugins();
+     } catch (e: any) {
+       console.error('Import failed:', e);
+       Alert.alert('Import Error', e.message || 'Failed to import plugin.');
+     }
+   };
 
   useEffect(() => {
     fetchPlugins();
   }, [config?.worldPath]);
 
   const togglePlugin = async (plugin: PluginInfo) => {
+    if (plugin.corrupted) {
+      Alert.alert('Corrupted Plugin', 'This plugin JAR is unreadable or damaged. Please re-install it.');
+      return;
+    }
     if (status?.status === 'running') {
       Alert.alert('Warning', 'Server is running. Changes will take effect on next restart.');
     }
@@ -207,12 +235,29 @@ export default function PluginsScreen() {
        ) : plugins.map((plugin) => (
           <Card key={plugin.path} style={styles.pluginCard}>
             <View style={styles.pluginInfo}>
-              <Link href={`/plugins/${encodeURIComponent(plugin.name)}`} style={{ textDecorationLine: 'none' }}>
-                <Text style={[theme.body, { fontWeight: 'bold', color: plugin.enabled ? '#fff' : '#6b7280' }]}>
-                  {plugin.name}
-                </Text>
-              </Link>
-               <Text style={theme.subtext}>Size: {(plugin.size / 1024 / 1024).toFixed(2)} MB</Text>
+              <Pressable
+                onPress={() => {
+                  if (plugin.corrupted) {
+                    Alert.alert('Corrupted Plugin', 'This plugin JAR is unreadable or damaged. Please re-install it.');
+                  } else {
+                    router.push(`/plugins/${encodeURIComponent(plugin.name)}`);
+                  }
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Text style={[theme.body, { fontWeight: 'bold', color: plugin.enabled ? '#fff' : '#6b7280' }]}>
+                    {plugin.metadata?.name || plugin.name}
+                  </Text>
+                  {plugin.corrupted && <Text style={{ fontSize: 16 }}>⚠️</Text>}
+                </View>
+              </Pressable>
+              {plugin.metadata?.version && (
+                <Text style={theme.subtext}>Version: {plugin.metadata.version}</Text>
+              )}
+              {plugin.metadata?.author && (
+                <Text style={theme.subtext}>Author: {plugin.metadata.author}</Text>
+              )}
+              <Text style={theme.subtext}>Size: {(plugin.size / 1024 / 1024).toFixed(2)} MB</Text>
             </View>
             <View style={{ flexDirection: 'row', gap: 8 }}>
               <Button 
