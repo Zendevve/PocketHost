@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Backup & Polish
-status: unknown
-last_updated: "2026-04-16T13:06:23.217Z"
+status: in-progress
+last_updated: "2026-04-17T08:30:00.000Z"
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 5
-  completed_plans: 5
+  total_phases: 7
+  completed_phases: 6
+  total_plans: 6
+  completed_plans: 6
 ---
 
 ## Current Position
 
-Phase: 5
+Phase: 7
 Plan: Not started
 
 ## Accumulated Context
@@ -25,10 +25,13 @@ Plan: Not started
 - Dashboard Controls — live console, memory/world configuration
 - Plugin Management — .jar import, enable/disable, YAML config edit, reload
 
-### Active (v1.1)
+### Validated (v1.1)
 
 - Backup & Restore — world zip backup, backup history, safe restore with validation and auto-restart
 - Nested Config Editor — YAML tree view, inline editing, array/object manipulation
+
+### Active (v1.1)
+
 - Plugin Metadata — extract name/version/author from plugin.yml inside JAR, display in list
 
 ### Out of Scope (v1.1)
@@ -45,4 +48,4 @@ Plan: Not started
 See: .planning/PROJECT.md (updated 2026-04-16)
 
 **Core value:** Making Minecraft server hosting feel like a native mobile experience
-**Current focus:** Phase null
+**Current focus:** Phase 7 — Plugin Metadata (PLUG-03 to PLUG-05)

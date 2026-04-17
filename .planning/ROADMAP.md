@@ -20,7 +20,7 @@
 ### 🚧 v1.1 Backup & Polish (In Progress)
 
 - [x] Phase 5: Backup Foundation — World backup/restore core (BACK-01 to BACK-05) (completed 2026-04-16)
-- [ ] Phase 6: Nested Config Editor — Tree-view YAML editor (CONF-01 to CONF-04)
+- [x] Phase 6: Nested Config Editor — Tree-view YAML editor (CONF-01 to CONF-04)
 - [ ] Phase 7: Plugin Metadata — JAR manifest parsing and display (PLUG-03 to PLUG-05)
 
 ## Progress
@@ -28,5 +28,5 @@
 | Phase | Milestone | Plans | Status | Completed |
 |-------|-----------|-------|--------|-----------|
 | 5 | v1.1 | 0 | Complete    | 2026-04-16 |
-| 6 | v1.1 | 0 | Planned | - |
+| 6 | v1.1 | 1 | Complete    | 2026-04-17 |
 | 7 | v1.1 | 0 | Planned | - |

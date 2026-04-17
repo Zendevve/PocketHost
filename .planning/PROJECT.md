@@ -32,10 +32,11 @@ Making Minecraft server hosting feel like a native mobile experience. It trades 
   - .jar import via file picker, YAML config editing, plugin enable/disable, and reload command delivered.
 - ✓ **Backup & Restore** (BACK-01, BACK-02, BACK-03, BACK-04, BACK-05) — v1.1 Phase 5
   - Full backup creation (ZIP), history persisted via AsyncStorage; restore with dual-confirmation (dialog + world name), automatic server stop/start, integrity validation (ZIP and world), rollback on failure, and progress UI.
+- ✓ **Nested Config Editor** (CONF-01, CONF-02, CONF-03, CONF-04) — v1.1 Phase 6
+  - Tree-view YAML editor with inline scalar editing, array/object add/remove/reorder, and js-yaml-based round-trip structure preservation.
 
 ### Active
 
-- [ ] **Nested Config Editor**: Support complex YAML structures in plugin config UI.
 - [ ] **Plugin Metadata**: Display plugin name, version, author from JAR descriptor.
 
 ### Out of Scope
@@ -54,10 +55,10 @@ Making Minecraft server hosting feel like a native mobile experience. It trades 
 - Memory allocation (up to 4GB) and world selection operational.
 - Plugin lifecycle complete — install, enable/disable, config edit, reload.
 - World backup & restore system — ZIP creation, history persistence, dual-confirmation restore with automatic server stop/start, validation, progress feedback.
+- Nested YAML config editor — tree-view rendering of complex plugin configs, inline scalar editing, array/object manipulation, round-trip structure preservation.
 
 **Known Issues & Technical Debt:**
 - CORE-03 (clean stop) not formally verified; relies on UI stop button.
-- Config editor limited to flat key-value pairs; nested structures deferred.
 - Plugin metadata extraction pending (ZIP library now in place).
 - Some TypeScript workarounds: `any` casts in `serverManager.ts` for missing native typings.
 - VALIDATION.md checklists contain unchecked manual tests.
@@ -82,9 +83,10 @@ Making Minecraft server hosting feel like a native mobile experience. It trades 
 | **Flat key-value config editor only** | Nested objects require more UI work; defer to keep Phase 4 scope tight. | ✓ Good — Covers majority of plugin configs; nested planned for v1.1. |
 | **Defer plugin metadata extraction** | Requires ZIP/JAR parsing library; out of scope for core plugin management. | ⚠️ Revisit — Add metadata reader in next milestone using ` admzip ` or similar. |
 | **Adm-zip for ZIP operations** | JS ZIP library compatible with React Native (base64) | ✓ Good — Backups created and restored successfully with validation |
----
+| **Tree-view config editor integrated inline** | Keep Save button inside ConfigTreeEditor for consistency; use modals for add operations; infer array item types | ✓ Good — Matches existing ConfigEditor UX pattern; no screen changes needed |
+| **Defer plugin metadata extraction** | Requires ZIP/JAR parsing library; out of scope for core plugin management. | ⚠️ Revisit — Add metadata reader in next milestone using `admzip` or similar. |
 
-*Last updated: 2026-04-16 after Phase 5 (Backup Foundation) completion*
+*Last updated: 2026-04-17 after Phase 6 (Nested Config Editor) completion*
 
 ## Evolution
 

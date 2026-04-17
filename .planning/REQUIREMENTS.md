@@ -10,10 +10,10 @@
 
 ## Configuration
 
-- [ ] **CONF-01**: User can view plugin configuration as a nested tree with expandable/collapsible objects and arrays
-- [ ] **CONF-02**: User can edit any scalar value (string, number, boolean) inline with real-time YAML syntax validation
-- [ ] **CONF-03**: User can add new items to arrays and object keys, remove existing items, and reorder array elements
-- [ ] **CONF-04**: Config editor preserves YAML document structure on round-trip (comments not guaranteed, but formatting minimally affected)
+- [x] **CONF-01**: User can view plugin configuration as a nested tree with expandable/collapsible objects and arrays
+- [x] **CONF-02**: User can edit any scalar value (string, number, boolean) inline with real-time YAML syntax validation
+- [x] **CONF-03**: User can add new items to arrays and object keys, remove existing items, and reorder array elements
+- [x] **CONF-04**: Config editor preserves YAML document structure on round-trip (comments not guaranteed, but formatting minimally affected)
 
 ## Plugin Metadata
 
@@ -25,15 +25,15 @@
 
 | Req ID | Phase | Status | Notes |
 |--------|-------|--------|-------|
-| BACK-01 | 5 | pending | |
-| BACK-02 | 5 | pending | |
-| BACK-03 | 5 | pending | |
-| BACK-04 | 5 | pending | |
-| BACK-05 | 5 | pending | |
-| CONF-01 | 6 | pending | |
-| CONF-02 | 6 | pending | |
-| CONF-03 | 6 | pending | |
-| CONF-04 | 6 | pending | |
+| BACK-01 | 5 | validated | implemented |
+| BACK-02 | 5 | validated | implemented |
+| BACK-03 | 5 | validated | implemented |
+| BACK-04 | 5 | validated | implemented |
+| BACK-05 | 5 | validated | implemented |
+| CONF-01 | 6 | validated | tree-view YAML editor implemented |
+| CONF-02 | 6 | validated | inline scalar editing with YAML validation |
+| CONF-03 | 6 | validated | add/remove/reorder arrays and objects |
+| CONF-04 | 6 | validated | js-yaml round-trip structure preservation |
 | PLUG-03 | 7 | pending | |
 | PLUG-04 | 7 | pending | |
 | PLUG-05 | 7 | pending | |
