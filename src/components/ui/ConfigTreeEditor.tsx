@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
 import { theme, colors } from '../../lib/theme';
 import { YamlNode } from './YamlNode';
 import * as yaml from 'js-yaml';
+import { writePluginConfig } from '../../services/pluginConfigManager';
 
 interface ConfigTreeEditorProps {
   initialConfig: Record<string, unknown>;
@@ -173,7 +174,6 @@ export function ConfigTreeEditor({ initialConfig, configPath, onSaved }: ConfigT
   const handleSave = async () => {
     setValidationError(null);
 
-    // Validate YAML round-trip
     try {
       yaml.dump(config, { lineWidth: 0, noRefs: true, quotingType: '"' });
     } catch (e: any) {
@@ -183,7 +183,6 @@ export function ConfigTreeEditor({ initialConfig, configPath, onSaved }: ConfigT
 
     setSaving(true);
     try {
-      const { writePluginConfig } = await import('../../services/pluginConfigManager');
       const ok = await writePluginConfig(configPath, config);
       if (ok) {
         Alert.alert('Success', 'Configuration saved.');

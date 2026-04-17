@@ -2,6 +2,16 @@ import { useState } from 'react';
 import { View, Text, Pressable, TextInput, Modal } from 'react-native';
 import { theme, colors } from '../../lib/theme';
 
+type NodeType = 'object' | 'array' | 'string' | 'number' | 'boolean' | 'null';
+
+function getNodeType(value: unknown): NodeType {
+  if (value === null) return 'null';
+  if (Array.isArray(value)) return 'array';
+  if (typeof value === 'object') return 'object';
+  return typeof value as NodeType;
+}
+
+
 interface YamlNodeProps {
   path: string;
   value: unknown;
