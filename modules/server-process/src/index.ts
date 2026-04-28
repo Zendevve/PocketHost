@@ -11,7 +11,7 @@ try {
 } catch (e) {
   console.warn('Native module ServerProcess not found, using stub');
   ServerProcess = {
-    startServer: async () => true,
+    startServer: async (_jarPath: string, _maxMem: number, _worldDir: string, _jvmFlags: string) => true,
     stopServer: async () => true,
     sendCommand: async () => true,
     isRunning: () => false,
@@ -19,8 +19,8 @@ try {
 }
 
 export default {
-  startServer: async (jarPath: string, maxMem: number, worldDir: string): Promise<boolean> => {
-    return await ServerProcess.startServer(jarPath, maxMem, worldDir);
+  startServer: async (jarPath: string, maxMem: number, worldDir: string, jvmFlags: string = ''): Promise<boolean> => {
+    return await ServerProcess.startServer(jarPath, maxMem, worldDir, jvmFlags);
   },
   stopServer: async (): Promise<boolean> => {
     return await ServerProcess.stopServer();

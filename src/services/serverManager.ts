@@ -82,7 +82,11 @@ export const serverManager = {
       const worldDir = config.worldPath.endsWith('/') ? config.worldPath : config.worldPath + '/';
       const jarPath = serverDir + 'server.jar';
 
-      ServerProcessModule.startServer(jarPath, memoryLimit, worldDir);
+      const jvmFlagsStr = config.jvmFlagsOptimized && config.jvmFlags.length > 0
+        ? config.jvmFlags.join('|')
+        : '';
+
+      ServerProcessModule.startServer(jarPath, memoryLimit, worldDir, jvmFlagsStr);
     } catch (e: any) {
       useServerStore.getState().setStatus(id, {
         status: 'error',
