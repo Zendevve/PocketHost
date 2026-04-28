@@ -16,7 +16,7 @@ Making Minecraft server hosting feel like a native mobile experience. It trades 
 - World backup: zip world folder, download to device, cloud backup option
 - World restore: pick backup file, extract over current world (with safety prompts)
 - Nested YAML config editor — support objects and arrays in plugin configs
-- Plugin metadata reader — extract name, version, author from plugin JARs
+- Plugin metadata reader — extract name, version, author from plugin JARs (complete)
 
 ## Requirements
 
@@ -34,10 +34,12 @@ Making Minecraft server hosting feel like a native mobile experience. It trades 
   - Full backup creation (ZIP), history persisted via AsyncStorage; restore with dual-confirmation (dialog + world name), automatic server stop/start, integrity validation (ZIP and world), rollback on failure, and progress UI.
 - ✓ **Nested Config Editor** (CONF-01, CONF-02, CONF-03, CONF-04) — v1.1 Phase 6
   - Tree-view YAML editor with inline scalar editing, array/object add/remove/reorder, and js-yaml-based round-trip structure preservation.
+- ✓ **Plugin Metadata** (PLUG-03, PLUG-04, PLUG-05) — v1.1 Phase 7
+  - JAR manifest parsing via adm-zip; plugin name/version/author display; corrupted JAR warning handling.
 
 ### Active
 
-- [ ] **Plugin Metadata**: Display plugin name, version, author from JAR descriptor.
+*None — all v1.1 requirements validated.*
 
 ### Out of Scope
 
@@ -86,7 +88,7 @@ Making Minecraft server hosting feel like a native mobile experience. It trades 
 | **Tree-view config editor integrated inline** | Keep Save button inside ConfigTreeEditor for consistency; use modals for add operations; infer array item types | ✓ Good — Matches existing ConfigEditor UX pattern; no screen changes needed |
 | **Defer plugin metadata extraction** | Requires ZIP/JAR parsing library; out of scope for core plugin management. | ⚠️ Revisit — Add metadata reader in next milestone using `admzip` or similar. |
 
-*Last updated: 2026-04-17 after Phase 6 (Nested Config Editor) completion*
+*Last updated: 2026-04-28 after Phase 7 (Plugin Metadata) validation*
 
 ## Evolution
 
