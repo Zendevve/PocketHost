@@ -48,11 +48,13 @@ World backup ZIP creation and restore with dual-confirmation safety, nested YAML
 - ✓ **Plugin Metadata** (PLUG-03, PLUG-04, PLUG-05) — v1.1
   - JAR manifest parsing via adm-zip; plugin name/version/author display; corrupted JAR warning handling.
 
+- ✓ **Performance Tuning** (PERF-01, PERF-02, PERF-03, PERF-04) — v1.2 Phase 8
+  - Slider controls for view-distance, simulation-distance, max-players; Low/Med/High presets; Aikar's JVM optimization toggle; restart safety prompts.
+
 ### Active
 
 - [ ] **Player Management** — Whitelist, bans/kicks, op/de-op permissions (v1.2 target)
 - [ ] **Sharing & Invites** — One-tap share server address, QR code generation (v1.2 target)
-- [ ] **Performance Tuning** — View distance, player limits, entity caps, GC flags (v1.2 target)
 
 ### Out of Scope
 
