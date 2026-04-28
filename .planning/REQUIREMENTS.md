@@ -7,10 +7,10 @@
 
 ### Performance Tuning
 
-- [ ] **PERF-01**: User can adjust key `server.properties` performance fields (view-distance, simulation-distance, max-players, entity-broadcast-range-percentage) via sliders/inputs with valid range constraints
-- [ ] **PERF-02**: User can select from Low/Medium/High performance presets that configure multiple server.properties settings and JVM flags at once
-- [ ] **PERF-03**: User can enable JVM GC optimization flags (Aikar's preset) with an on/off toggle; flags applied on next server start
-- [ ] **PERF-04**: Property edits show clear "restart required" warning when server is running; server validates values before restart
+- [x] **PERF-01**: User can adjust key `server.properties` performance fields (view-distance, simulation-distance, max-players, entity-broadcast-range-percentage) via sliders/inputs with valid range constraints
+- [x] **PERF-02**: User can select from Low/Medium/High performance presets that configure multiple server.properties settings and JVM flags at once
+- [x] **PERF-03**: User can enable JVM GC optimization flags (Aikar's preset) with an on/off toggle; flags applied on next server start
+- [x] **PERF-04**: Property edits show clear "restart required" warning when server is running; server validates values before restart
 
 ### Player Management
 
@@ -42,10 +42,10 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PERF-01 | 8 | Pending |
-| PERF-02 | 8 | Pending |
-| PERF-03 | 8 | Pending |
-| PERF-04 | 8 | Pending |
+| PERF-01 | 8 | validated | slider controls with valid ranges |
+| PERF-02 | 8 | validated | card-based Low/Med/High presets |
+| PERF-03 | 8 | validated | Aikar's flags toggle, on by default |
+| PERF-04 | 8 | validated | yellow banner + restart dialog |
 | PLAY-01 | 9 | Pending |
 | PLAY-02 | 9 | Pending |
 | PLAY-03 | 9 | Pending |

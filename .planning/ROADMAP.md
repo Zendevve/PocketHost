@@ -29,7 +29,7 @@
 
 ### 🚧 v1.2 Server Management & Multiplayer (In Progress)
 
-- [ ] Phase 8: Performance Tuning — server.properties, JVM flags, presets (PERF-01 to PERF-04)
+- [x] Phase 8: Performance Tuning — server.properties, JVM flags, presets (PERF-01 to PERF-04) (completed 2026-04-28)
 - [ ] Phase 9: Player Management — online list, context actions, whitelist, bans (PLAY-01 to PLAY-05)
 - [ ] Phase 10: Sharing & Invites — QR code, clipboard copy, share sheet (SHAR-01 to SHAR-03)
 
@@ -44,7 +44,7 @@
 | 5 | v1.1 | 1 | Complete | 2026-04-16 |
 | 6 | v1.1 | 1 | Complete | 2026-04-17 |
 | 7 | v1.1 | 1 | Complete | 2026-04-17 |
-| 8 | v1.2 | 1 | Planned | — |
+| 8 | v1.2 | 1 | Complete | 2026-04-28 |
 | 9 | v1.2 | 1 | Not started | — |
 | 10 | v1.2 | 1 | Not started | — |
 
