@@ -102,7 +102,7 @@ export async function writePluginConfig(configPath: string, config: Record<strin
  * Convert a file:// URI to a native filesystem path for adm-zip.
  * Strips the 'file://' prefix. On non-URI paths, returns as-is.
  */
-function uriToNativePath(uri: string): string {
+export function uriToNativePath(uri: string): string {
   if (uri.startsWith('file://')) {
     return uri.substring(7);
   }
@@ -118,8 +118,8 @@ export async function isCorruptedJar(jarPath: string): Promise<boolean> {
     // Attempt to read the JAR with adm-zip
     const zip = new AdmZip(nativePath);
     // Check if we can read the central directory (basic validity)
-    const entries = zip.getEntries();
-    return entries.length === 0 && !zip.readAsTextAsync; // JAR is empty but not necessarily corrupted; pass through
+    zip.getEntries();
+    return false;
   } catch (e) {
     console.warn(`isCorruptedJar: failed to read JAR at ${jarPath}:`, e);
     return true;
