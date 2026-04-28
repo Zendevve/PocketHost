@@ -44,7 +44,7 @@
 | 5 | v1.1 | 1 | Complete | 2026-04-16 |
 | 6 | v1.1 | 1 | Complete | 2026-04-17 |
 | 7 | v1.1 | 1 | Complete | 2026-04-17 |
-| 8 | v1.2 | 1 | Not started | — |
+| 8 | v1.2 | 1 | Planned | — |
 | 9 | v1.2 | 1 | Not started | — |
 | 10 | v1.2 | 1 | Not started | — |
 
