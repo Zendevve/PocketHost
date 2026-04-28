@@ -1,13 +1,17 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
-import { useServerStore } from '../../store/serverStore';
+import { useServerStore } from '../../stores/serverStore';
 
 export const Console = () => {
-  const logs = useServerStore(state => state.logs);
+  const activeServerId = useServerStore((s) => s.activeServerId);
+  const consoleLogs = useServerStore((s) => s.consoleLogs);
+  const logs = useMemo(
+    () => (activeServerId ? consoleLogs[activeServerId] ?? [] : []),
+    [activeServerId, consoleLogs]
+  );
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
-    // Scroll to bottom when logs change
     if (logs.length > 0) {
       setTimeout(() => {
         flatListRef.current?.scrollToEnd({ animated: false });

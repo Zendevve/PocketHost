@@ -1,17 +1,33 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator, Linking, TextInput } from 'react-native';
 import { Console } from '../components/ui/Console';
 import { serverManager } from '../services/serverManager';
-import { useServerStore } from '../store/serverStore';
+import { useServerStore } from '../stores/serverStore';
 
 export default function Dashboard() {
-  const { status, errorMessage, playitClaimUrl, playitAddress, config, actions } = useServerStore(state => state);
+  const configs = useServerStore((s) => s.configs);
+  const activeServerId = useServerStore((s) => s.activeServerId);
+  const statuses = useServerStore((s) => s.statuses);
+
+  const activeConfig = useMemo(
+    () => configs.find((c) => c.id === activeServerId),
+    [configs, activeServerId]
+  );
+  const activeState = useMemo(
+    () => (activeServerId ? statuses[activeServerId] : undefined),
+    [activeServerId, statuses]
+  );
+
+  const status = activeState?.status ?? 'idle';
+  const errorMessage = activeState?.error ?? null;
+  const playitClaimUrl = activeState?.playitClaimUrl ?? null;
+  const playitAddress = activeState?.relayAddress ?? null;
+  const memoryLimit = activeConfig?.maxMemoryMB ?? 2048;
+  const activeWorld = activeConfig?.worldName ?? 'world';
 
   useEffect(() => {
     serverManager.initializeEventListeners();
-    return () => {
-      // Cleanup could happen here if necessary, but we are keeping event listeners alive for now
-    };
+    return () => {};
   }, []);
 
   const handleToggleServer = () => {
@@ -23,8 +39,14 @@ export default function Dashboard() {
   };
 
   const handleMemoryChange = (amount: number) => {
-    const newMem = Math.max(512, Math.min(4096, config.memoryLimit + amount));
-    actions.updateConfig({ memoryLimit: newMem });
+    if (!activeServerId) return;
+    const newMem = Math.max(512, Math.min(4096, memoryLimit + amount));
+    const store = useServerStore.getState();
+    const updatedConfigs = store.configs.map((c) =>
+      c.id === activeServerId ? { ...c, maxMemoryMB: newMem } : c
+    );
+    useServerStore.setState({ configs: updatedConfigs });
+    store.setStatus(activeServerId, { memoryMaxMB: newMem });
   };
 
   return (
@@ -33,7 +55,7 @@ export default function Dashboard() {
         <Text style={styles.title}>PocketHost</Text>
         <View style={styles.statusContainer}>
           <View style={[
-            styles.statusIndicator, 
+            styles.statusIndicator,
             { backgroundColor: status === 'running' ? '#00FF00' : (status === 'starting' ? '#FFA500' : '#FF0000') }
           ]} />
           <Text style={styles.statusText}>{status.toUpperCase()}</Text>
@@ -43,10 +65,17 @@ export default function Dashboard() {
       <View style={styles.settingsRow} pointerEvents={status === 'idle' ? 'auto' : 'none'}>
         <View style={[styles.settingBlock, status !== 'idle' && styles.settingDisabled]}>
           <Text style={styles.settingLabel}>Active World</Text>
-          <TextInput 
+          <TextInput
             style={styles.textInput}
-            value={config.activeWorld}
-            onChangeText={(text) => actions.updateConfig({ activeWorld: text })}
+            value={activeWorld}
+            onChangeText={(text) => {
+              if (!activeServerId) return;
+              const store = useServerStore.getState();
+              const updatedConfigs = store.configs.map((c) =>
+                c.id === activeServerId ? { ...c, worldName: text } : c
+              );
+              useServerStore.setState({ configs: updatedConfigs });
+            }}
             placeholder="world"
             placeholderTextColor="#666"
           />
@@ -57,7 +86,7 @@ export default function Dashboard() {
             <TouchableOpacity style={styles.stepperButton} onPress={() => handleMemoryChange(-512)}>
               <Text style={styles.stepperButtonText}>-</Text>
             </TouchableOpacity>
-            <Text style={styles.stepperValue}>{config.memoryLimit} MB</Text>
+            <Text style={styles.stepperValue}>{memoryLimit} MB</Text>
             <TouchableOpacity style={styles.stepperButton} onPress={() => handleMemoryChange(512)}>
               <Text style={styles.stepperButtonText}>+</Text>
             </TouchableOpacity>
@@ -66,7 +95,7 @@ export default function Dashboard() {
       </View>
 
       <View style={styles.controls}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.button, status === 'starting' ? styles.buttonDisabled : null]}
           onPress={handleToggleServer}
           disabled={status === 'starting'}
@@ -81,7 +110,7 @@ export default function Dashboard() {
         </TouchableOpacity>
 
         {playitClaimUrl && !playitAddress && (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.claimButton}
             onPress={() => Linking.openURL(playitClaimUrl)}
           >
@@ -96,10 +125,10 @@ export default function Dashboard() {
           </View>
         )}
       </View>
-      
+
       {errorMessage && (
         <View style={styles.errorContainer}>
-           <Text style={styles.errorText}>{errorMessage}</Text>
+          <Text style={styles.errorText}>{errorMessage}</Text>
         </View>
       )}
 

@@ -23,6 +23,7 @@ export interface ServerState {
   pid: number | null;
   lanAddress: string | null;
   relayAddress: string | null;
+  playitClaimUrl: string | null;
   uptimeSeconds: number;
   memoryUsedMB: number;
   memoryMaxMB: number;
@@ -37,6 +38,7 @@ export function createDefaultServerState(config: ServerConfig): ServerState {
     pid: null,
     lanAddress: null,
     relayAddress: null,
+    playitClaimUrl: null,
     uptimeSeconds: 0,
     memoryUsedMB: 0,
     memoryMaxMB: config.maxMemoryMB,
