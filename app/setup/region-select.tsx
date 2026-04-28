@@ -8,7 +8,7 @@ import { theme } from '../../src/lib/theme';
 import { getServerJarUrl } from '../../src/services/versionManifest';
 import { bootstrapServerFiles } from '../../src/services/worldFileManager';
 import { useServerStore } from '../../src/stores/serverStore';
-import { RelayRegion, ServerConfig } from '../../src/types/server';
+import { RelayRegion, ServerConfig, DEFAULT_JVM_FLAGS } from '../../src/types/server';
 
 const REGIONS: RelayRegion[] = ['global', 'na', 'eu', 'ap'];
 
@@ -51,6 +51,8 @@ export default function RegionSelectScreen() {
         maxMemoryMB: maxMemory,
         relayRegion: region,
         crossplayEnabled: params.crossplayEnabled === 'true',
+        jvmFlagsOptimized: true,
+        jvmFlags: DEFAULT_JVM_FLAGS,
         createdAt: Date.now(),
       };
 

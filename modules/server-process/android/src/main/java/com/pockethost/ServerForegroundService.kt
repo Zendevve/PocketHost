@@ -114,7 +114,7 @@ class ServerForegroundService : Service() {
         return javaBin.absolutePath
     }
 
-    fun startServer(jarPath: String, maxMem: Int, worldDir: String) {
+    fun startServer(jarPath: String, maxMem: Int, worldDir: String, jvmFlags: List<String> = emptyList()) {
         if (process?.isAlive == true) return
 
         thread {
@@ -123,14 +123,13 @@ class ServerForegroundService : Service() {
                 val javaBin = extractJreIfNeeded()
                 
                 // 2. Build the process command
-                val cmd = listOf(
-                    javaBin,
-                    "-Xmx${maxMem}M",
-                    "-Xms${maxMem / 2}M",
-                    "-jar", jarPath,
-                    "--nogui",
-                    "--world", worldDir
-                )
+                val cmd = mutableListOf(javaBin)
+                cmd.add("-Xmx${maxMem}M")
+                cmd.add("-Xms${maxMem / 2}M")
+                for (flag in jvmFlags) {
+                    cmd.add(flag)
+                }
+                cmd.addAll(listOf("-jar", jarPath, "--nogui", "--world", worldDir))
 
                 val pb = ProcessBuilder(cmd)
                     .redirectErrorStream(true)

@@ -21,6 +21,9 @@ interface ServerStore {
   setBackupStatus: (status: 'idle' | 'creating' | 'restoring' | 'error') => void;
   setLastBackup: (time: string | null) => void;
   setBackupError: (msg: string | null) => void;
+  setJvmOptimized: (id: string, optimized: boolean) => void;
+  setJvmFlags: (id: string, flags: string[]) => void;
+  setMaxMemory: (id: string, memoryMB: number) => void;
   reset: () => void;
 }
 
@@ -104,6 +107,34 @@ export const useServerStore = create<ServerStore>()(
       setLastBackup: (time) => set({ lastBackupTime: time }),
 
       setBackupError: (msg) => set({ backupError: msg }),
+
+      setJvmOptimized: (id, optimized) =>
+        set((s) => ({
+          configs: s.configs.map((c) =>
+            c.id === id ? { ...c, jvmFlagsOptimized: optimized } : c
+          ),
+        })),
+
+      setJvmFlags: (id, flags) =>
+        set((s) => ({
+          configs: s.configs.map((c) =>
+            c.id === id ? { ...c, jvmFlags: flags } : c
+          ),
+        })),
+
+      setMaxMemory: (id, memoryMB) =>
+        set((s) => ({
+          configs: s.configs.map((c) =>
+            c.id === id ? { ...c, maxMemoryMB: memoryMB } : c
+          ),
+          statuses: {
+            ...s.statuses,
+            [id]: {
+              ...(s.statuses[id] ?? {}),
+              memoryMaxMB: memoryMB,
+            } as any,
+          },
+        })),
 
       reset: () =>
         set({

@@ -55,16 +55,15 @@ class ServerProcessModule : Module() {
       }
     }
 
-    AsyncFunction("startServer") { jarPath: String, maxMem: Int, worldDir: String ->
+    AsyncFunction("startServer") { jarPath: String, maxMem: Int, worldDir: String, jvmFlags: String ->
       try {
         val context = appContext.reactContext ?: throw Exception("No react context")
         
-        // Start the foreground service explicitly
         val serviceIntent = Intent(context, ServerForegroundService::class.java)
         ContextCompat.startForegroundService(context, serviceIntent)
 
-        // Command the service to start the Java process
-        serverService?.startServer(jarPath, maxMem, worldDir)
+        val flagsArray = if (jvmFlags.isNotEmpty()) jvmFlags.split("|") else emptyList()
+        serverService?.startServer(jarPath, maxMem, worldDir, flagsArray)
           ?: throw Exception("Service not bound yet")
         true
       } catch (e: Exception) {
