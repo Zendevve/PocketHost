@@ -16,9 +16,18 @@ Core Minecraft server execution on Android, Playit.gg tunnel integration, live d
 ### v1.1 Backup & Polish (2026-04-28)
 World backup ZIP creation and restore with dual-confirmation safety, nested YAML tree editor for complex plugin configs, plugin JAR metadata extraction (name/version/author) with corrupted JAR warnings.
 
-## Next Milestone: v1.2 (TBD)
+## Current Milestone: v1.2 Server Management & Multiplayer
 
-_No active milestone — ready for `/gsd-new-milestone` to define scope._
+**Goal:** Turn PocketHost from a server runner into a proper multiplayer host — give server owners tools to manage players, share access easily, and tune performance.
+
+**Target features:**
+- Player whitelist, bans/kicks, op/de-op — control who joins and what they can do
+- Sharing & invites — one-tap copy address, QR code, share sheet integration
+- Performance tuning — view distance, player limits, entity caps, JVM GC flags
+
+**Stretch:**
+- Real-time online player list with join/leave events
+- Server MOTD and name customization
 
 ## Requirements
 
@@ -41,7 +50,9 @@ _No active milestone — ready for `/gsd-new-milestone` to define scope._
 
 ### Active
 
-_None — no active milestone. Run `/gsd-new-milestone` to define next scope._
+- [ ] **Player Management** — Whitelist, bans/kicks, op/de-op permissions (v1.2 target)
+- [ ] **Sharing & Invites** — One-tap share server address, QR code generation (v1.2 target)
+- [ ] **Performance Tuning** — View distance, player limits, entity caps, GC flags (v1.2 target)
 
 ### Out of Scope
 
@@ -91,7 +102,7 @@ _None — no active milestone. Run `/gsd-new-milestone` to define next scope._
 | **Progress reporting via callback** | Enables real-time UI feedback during backup operations. | ✓ Good — Progress bar in backup screen. |
 | **Rollback strategy (.old directory)** | Safe restore: move current to .old, extract backup, validate, rollback on failure. | ✓ Good — Prevents data loss on restore failure. |
 
-*Last updated: 2026-04-28 after v1.1 milestone completion*
+*Last updated: 2026-04-28 after v1.2 milestone initialization*
 
 ## Evolution
 

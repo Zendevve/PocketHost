@@ -1,9 +1,9 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: idle
-last_updated: "2026-04-28T11:01:13.000Z"
+milestone: v1.2
+milestone_name: Server Management & Multiplayer
+status: defining-requirements
+last_updated: "2026-04-28T11:20:24.000Z"
 progress:
   total_phases: 7
   completed_phases: 7
@@ -13,8 +13,10 @@ progress:
 
 ## Current Position
 
-No active milestone. v1.0 and v1.1 milestones are shipped.
-Ready for `/gsd-new-milestone` to define v1.2 scope.
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-28 — Milestone v1.2 started
 
 ## Accumulated Context
 
@@ -43,4 +45,4 @@ Ready for `/gsd-new-milestone` to define v1.2 scope.
 See: .planning/PROJECT.md (updated 2026-04-28)
 
 **Core value:** Making Minecraft server hosting feel like a native mobile experience
-**Current focus:** Ready for next milestone planning
+**Current focus:** v1.2 Server Management & Multiplayer — defining requirements
