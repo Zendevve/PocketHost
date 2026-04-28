@@ -2,11 +2,11 @@
 
 ## Backup & Restore
 
-- [ ] **BACK-01**: User can create a manual backup of the current world as a ZIP file saved to the device downloads folder
-- [ ] **BACK-02**: User can view a history of backups showing timestamp, world name, file size, and storage path
-- [ ] **BACK-03**: User can restore a selected backup after dual confirmation (dialog + world name text input) with automatic server stop and optional restart
-- [ ] **BACK-04**: System validates ZIP integrity (CRC) before offering restore, and displays real-time progress during backup/restore operations
-- [ ] **BACK-05**: After restore completes, server automatically restarts (if it was running before) and world loads without errors
+- [x] **BACK-01**: User can create a manual backup of the current world as a ZIP file saved to the device downloads folder
+- [x] **BACK-02**: User can view a history of backups showing timestamp, world name, file size, and storage path
+- [x] **BACK-03**: User can restore a selected backup after dual confirmation (dialog + world name text input) with automatic server stop and optional restart
+- [x] **BACK-04**: System validates ZIP integrity (CRC) before offering restore, and displays real-time progress during backup/restore operations
+- [x] **BACK-05**: After restore completes, server automatically restarts (if it was running before) and world loads without errors
 
 ## Configuration
 
@@ -17,9 +17,9 @@
 
 ## Plugin Metadata
 
-- [ ] **PLUG-03**: System extracts plugin name, version, author, and description from `plugin.yml` inside the JAR on import
-- [ ] **PLUG-04**: Plugin management screen displays metadata alongside filename (name, version, author); falls back to filename if metadata missing
-- [ ] **PLUG-05**: Corrupted or unreadable JARs show a warning icon and display an error toast on selection
+- [x] **PLUG-03**: System extracts plugin name, version, author, and description from `plugin.yml` inside the JAR on import
+- [x] **PLUG-04**: Plugin management screen displays metadata alongside filename (name, version, author); falls back to filename if metadata missing
+- [x] **PLUG-05**: Corrupted or unreadable JARs show a warning icon and display an error toast on selection
 
 ## Traceability
 
@@ -34,9 +34,9 @@
 | CONF-02 | 6 | validated | inline scalar editing with YAML validation |
 | CONF-03 | 6 | validated | add/remove/reorder arrays and objects |
 | CONF-04 | 6 | validated | js-yaml round-trip structure preservation |
-| PLUG-03 | 7 | pending | |
-| PLUG-04 | 7 | pending | |
-| PLUG-05 | 7 | pending | |
+| PLUG-03 | 7 | validated | adm-zip JAR plugin.yml parsing |
+| PLUG-04 | 7 | validated | metadata display in list/detail UI |
+| PLUG-05 | 7 | validated | corrupted JAR warning + blocked interactions |
 
 ## Out of Scope
 
@@ -51,4 +51,4 @@
 
 ---
 
-*Last updated: 2026-04-16 — v1.1 requirements drafted following research*
+*Last updated: 2026-04-28 — v1.1 all requirements validated (Phases 5-7 complete)*
