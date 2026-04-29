@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { Text, View, StyleSheet } from 'react-native';
 import { Button } from '../../src/components/ui/Button';
 import { Card } from '../../src/components/ui/Card';
+import { ShareSection } from '../../src/components/ShareSection';
 import { theme } from '../../src/lib/theme';
 import { useServerStore } from '../../src/stores/serverStore';
 
@@ -45,6 +46,10 @@ export default function ServerDashboardScreen() {
         <Text style={theme.subtext}>Memory: {activeState?.memoryUsedMB || 0} / {activeState?.memoryMaxMB || activeConfig.maxMemoryMB} MB</Text>
         <Text style={theme.subtext}>TPS: {activeState?.tps || 20}</Text>
       </Card>
+
+      {activeState?.status === 'running' && (
+        <ShareSection address={activeState?.relayAddress ?? 'localhost:25565'} />
+      )}
 
       {/* Backup Status Indicator */}
       <View style={styles.backupStatusContainer}>
