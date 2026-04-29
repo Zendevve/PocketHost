@@ -2,6 +2,8 @@ import { NativeEventEmitter } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import ServerProcessModule from '../../modules/server-process';
 import { useServerStore } from '../stores/serverStore';
+import { usePlayerStore } from '../stores/playerStore';
+import { parseLogLine } from './console-parser';
 import { downloadAssets } from './downloadService';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,6 +52,27 @@ export const serverManager = {
           useServerStore.getState().setStatus(id, { relayAddress: ipMatch[1] });
         }
       }
+
+      const parsed = parseLogLine(event.log);
+      if (parsed.type === 'join') {
+        usePlayerStore.getState().addOrUpdatePlayer({
+          uuid: '',
+          username: parsed.username,
+          online: true,
+          joinedAt: Date.now(),
+        });
+      } else if (parsed.type === 'leave') {
+        usePlayerStore.getState().removePlayer(parsed.username);
+      } else if (parsed.type === 'list') {
+        const currentPlayers = usePlayerStore.getState().players;
+        const nextPlayers = parsed.usernames.map((username) => {
+          const existing = currentPlayers.find((p) => p.username === username);
+          return existing
+            ? { ...existing, online: true }
+            : { uuid: '', username, online: true, joinedAt: Date.now() };
+        });
+        usePlayerStore.getState().setPlayers(nextPlayers);
+      }
     });
 
     emitter.addListener('onStatusChange', (event: { status: string }) => {
@@ -58,6 +81,7 @@ export const serverManager = {
         useServerStore.getState().setStatus(id, { status: 'running' });
       } else if (event.status === 'STOPPED') {
         useServerStore.getState().setStatus(id, { status: 'idle' });
+        usePlayerStore.getState().clear();
       }
     });
 
@@ -100,6 +124,6 @@ export const serverManager = {
   },
 
   sendCommand: (command: string) => {
-    ServerProcessModule.sendCommand(command);
+    return ServerProcessModule.sendCommand(command);
   },
 };

@@ -1,5 +1,6 @@
 import * as FileSystem from 'expo-file-system';
 import ServerProcess from '../../modules/server-process';
+import { md5 } from '../utils/md5';
 
 export interface PlayerListEntry {
   uuid: string;
@@ -110,6 +111,13 @@ async function fetchMojangUuid(username: string): Promise<string | null> {
 }
 
 function generateOfflineUuid(username: string): string {
-  // Just a fake UUID for offline mode servers
-  return '00000000-0000-0000-0000-000000000000';
+  const hash = md5('OfflinePlayer:' + username);
+  const bytes: number[] = [];
+  for (let i = 0; i < hash.length; i += 2) {
+    bytes.push(parseInt(hash.substring(i, i + 2), 16));
+  }
+  bytes[6] = (bytes[6] & 0x0f) | 0x30;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = bytes.map((b) => b.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`;
 }
