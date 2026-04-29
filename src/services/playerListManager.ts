@@ -3,8 +3,9 @@ import ServerProcess from '../../modules/server-process';
 import { md5 } from '../utils/md5';
 
 export interface PlayerListEntry {
-  uuid: string;
-  name: string;
+  uuid?: string;
+  name?: string;
+  ip?: string;
   level?: number;
   bypassesPlayerLimit?: boolean;
   created?: string;
@@ -34,15 +35,16 @@ export async function modifyPlayerList(
   listType: ListType,
   action: 'add' | 'remove',
   playerName: string,
-  isRunning: boolean
+  isRunning: boolean,
+  reason?: string
 ): Promise<boolean> {
   if (isRunning) {
     // If the server is running, dispatch a command so it handles logic correctly
     let command = '';
     if (listType === 'ops') command = action === 'add' ? `op ${playerName}` : `deop ${playerName}`;
     if (listType === 'whitelist') command = `whitelist ${action} ${playerName}`;
-    if (listType === 'banned-players') command = action === 'add' ? `ban ${playerName}` : `pardon ${playerName}`;
-    if (listType === 'banned-ips') command = action === 'add' ? `ban-ip ${playerName}` : `pardon-ip ${playerName}`;
+    if (listType === 'banned-players') command = action === 'add' ? `ban ${playerName} ${reason || 'Banned by an operator.'}` : `pardon ${playerName}`;
+    if (listType === 'banned-ips') command = action === 'add' ? `ban-ip ${playerName} ${reason || 'Banned by an operator.'}` : `pardon-ip ${playerName}`;
     
     if (command) {
       await ServerProcess.sendCommand(command);
@@ -61,7 +63,7 @@ export async function modifyPlayerList(
       let currentList = await getPlayerList(worldPath, listType);
       
       if (action === 'remove') {
-        currentList = currentList.filter(p => p.name.toLowerCase() !== playerName.toLowerCase());
+        currentList = currentList.filter(p => p.name?.toLowerCase() !== playerName.toLowerCase());
       } else {
         // Add player (needs UUID)
         const uuid = await fetchMojangUuid(playerName) || generateOfflineUuid(playerName);
@@ -74,11 +76,11 @@ export async function modifyPlayerList(
           entry.created = new Date().toISOString();
           entry.source = 'Server';
           entry.expires = 'forever';
-          entry.reason = 'Banned by an operator.';
+          entry.reason = reason || 'Banned by an operator.';
         }
         
         // Prevent duplicates
-        if (!currentList.find(p => p.name.toLowerCase() === playerName.toLowerCase())) {
+        if (!currentList.find(p => p.name?.toLowerCase() === playerName.toLowerCase())) {
           currentList.push(entry);
         }
       }
