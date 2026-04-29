@@ -2,7 +2,7 @@
 
 ## What This Is
 
-PocketHost is an Android app that turns a user's mobile device into a lightweight, portable Minecraft Java Edition server host. It allows friends and small communities to create, manage, and run their Minecraft worlds seamlessly from their phones without relying on a desktop or paid remote hosting. v1.0 shipped a stable backend, networking tunnels, server configuration, and full plugin management. v1.1 added world backup/restore, a nested YAML config editor, and plugin metadata display.
+PocketHost is an Android app that turns a user's mobile device into a lightweight, portable Minecraft Java Edition server host. It allows friends and small communities to create, manage, and run their Minecraft worlds seamlessly from their phones without relying on a desktop or paid remote hosting. v1.0 shipped a stable backend, networking tunnels, server configuration, and full plugin management. v1.1 added world backup/restore, a nested YAML config editor, and plugin metadata display. v1.2 added performance tuning, player management (whitelist, bans, ops), and sharing tools (QR code, share sheet).
 
 ## Core Value
 
@@ -16,18 +16,15 @@ Core Minecraft server execution on Android, Playit.gg tunnel integration, live d
 ### v1.1 Backup & Polish (2026-04-28)
 World backup ZIP creation and restore with dual-confirmation safety, nested YAML tree editor for complex plugin configs, plugin JAR metadata extraction (name/version/author) with corrupted JAR warnings.
 
-## Current Milestone: v1.2 Server Management & Multiplayer
+## Current Milestone: v1.3 (Planning)
 
-**Goal:** Turn PocketHost from a server runner into a proper multiplayer host — give server owners tools to manage players, share access easily, and tune performance.
+**Goal:** TBD — next milestone not yet defined.
 
-**Target features:**
-- Player whitelist, bans/kicks, op/de-op — control who joins and what they can do
-- Sharing & invites — one-tap copy address, QR code, share sheet integration
-- Performance tuning — view distance, player limits, entity caps, JVM GC flags
-
-**Stretch:**
-- Real-time online player list with join/leave events
-- Server MOTD and name customization
+**Potential directions:**
+- Server monitoring & logging improvements
+- World management (multiple worlds, world templates)
+- Advanced player features (chat, stats)
+- UI/UX polish and theming
 
 ## Requirements
 
@@ -50,11 +47,14 @@ World backup ZIP creation and restore with dual-confirmation safety, nested YAML
 
 - ✓ **Performance Tuning** (PERF-01, PERF-02, PERF-03, PERF-04) — v1.2 Phase 8
   - Slider controls for view-distance, simulation-distance, max-players; Low/Med/High presets; Aikar's JVM optimization toggle; restart safety prompts.
+- ✓ **Player Management** (PLAY-01, PLAY-02, PLAY-03, PLAY-04, PLAY-05) — v1.2 Phase 9
+  - Real-time online player list via console log parsing; context actions (kick/ban/op/deop/gamemode); whitelist/bans/ops management tabs with reason support.
+- ✓ **Sharing & Invites** (SHAR-01, SHAR-02, SHAR-03) — v1.2 Phase 10
+  - Clipboard copy via expo-clipboard; QR code modal via react-native-qrcode-svg; native OS share sheet integration.
 
 ### Active
 
-- [ ] **Player Management** — Whitelist, bans/kicks, op/de-op permissions (v1.2 target)
-- [ ] **Sharing & Invites** — One-tap share server address, QR code generation (v1.2 target)
+- [ ] **TBD** — Next milestone requirements not yet defined.
 
 ### Out of Scope
 
@@ -70,19 +70,19 @@ World backup ZIP creation and restore with dual-confirmation safety, nested YAML
 
 ## Context
 
-**Shipped v1.1** — 3 phases (5-7), ~12 days (Apr 16-28, 2026). React Native (Expo) + TypeScript + Zustand stack; adm-zip for ZIP/JAR operations; js-yaml for config editing; AsyncStorage for persistence.
-**Total codebase:** ~12,000 LOC TypeScript.
+**Shipped v1.2** — 3 phases (8-10), 2 days (Apr 28-29, 2026). 46 files changed, +3,308 / -738 LOC.
 
 **Outcomes:**
-- World backup & restore system — ZIP creation, history persistence, dual-confirmation restore with automatic server stop/start, validation, progress feedback.
-- Nested YAML config editor — tree-view rendering of complex plugin configs, inline scalar editing, array/object manipulation, round-trip structure preservation.
-- Plugin metadata display — name/version/author from JAR plugin.yml, corrupted JAR warnings with blocked interactions.
+- Performance tuning — server.properties sliders, Low/Med/High presets, Aikar's JVM toggle, restart flow.
+- Player management — console log parser for join/leave events, real-time online list, context actions, whitelist/ban/ops tabs.
+- Sharing & invites — clipboard copy, QR code modal, native share sheet.
 
 **Known Issues & Technical Debt:**
 - CORE-03 (clean stop) not formally verified; relies on UI stop button.
 - No test runner configured (jest/vitest); Phase 7 tests exist but can't run yet.
 - Some TypeScript workarounds: `any` casts in `serverManager.ts` for missing native typings.
 - Plugin metadata extracted on every list load (no caching).
+- Player store uses username as key (not UUID) — join events don't include UUIDs.
 
 **User Feedback:** N/A — not yet released externally; internal testing only.
 
@@ -103,8 +103,12 @@ World backup ZIP creation and restore with dual-confirmation safety, nested YAML
 | **Tree-view config editor integrated inline** | Keep Save button inside ConfigTreeEditor; modals for add operations. | ✓ Good — Matches existing UX pattern. |
 | **Progress reporting via callback** | Enables real-time UI feedback during backup operations. | ✓ Good — Progress bar in backup screen. |
 | **Rollback strategy (.old directory)** | Safe restore: move current to .old, extract backup, validate, rollback on failure. | ✓ Good — Prevents data loss on restore failure. |
+| **Pure-JS MD5 for offline UUIDs** | Avoids external crypto dependency in React Native. | ✓ Good — Works without native module changes. |
+| **Username-keyed player store** | Join events don't include UUIDs; username is reliable. | ✓ Good — Simple and correct for offline servers. |
+| **Console commands preferred when running** | Server handles logic and file writes; safest approach. | ✓ Good — Avoids race conditions with running server. |
+| **react-native-qrcode-svg for QR** | Pure JS, no extra native deps beyond react-native-svg. | ✓ Good — Works in Expo Go. |
 
-*Last updated: 2026-04-28 after v1.2 milestone initialization*
+*Last updated: 2026-04-29 after v1.2 milestone completion*
 
 ## Evolution
 
