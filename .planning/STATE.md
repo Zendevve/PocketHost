@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Competitor Parity
 status: complete
-last_updated: "2026-05-01T10:45:00.000Z"
+last_updated: "2026-05-01T12:00:00.000Z"
 progress:
-  total_phases: 14
-  completed_phases: 14
-  total_plans: 16
-  completed_plans: 16
+  total_phases: 15
+  completed_phases: 15
+  total_plans: 17
+  completed_plans: 17
 ---
 
 ## Current Position
 
-Milestone v1.3 complete. All competitor parity features implemented.
+Milestone v1.3 complete. All competitor parity features implemented and documented. Ready for v1.4 planning.
 
 ## Accumulated Context
 
@@ -42,11 +42,20 @@ Milestone v1.3 complete. All competitor parity features implemented.
 - Server Monitoring — real-time TPS/memory/player metrics, 24h historical bar charts, summary statistics
 - World Management — world duplication, rename, delete, template creation, create world from template
 - Analytics Dashboard — player session tracking, total playtime, server uptime history, peak players, daily activity
+- Documentation — API reference (15 services), architecture (4 layers), setup guide (from-zero with OAuth), troubleshooting (8 categories), updated README with test suite details
+
+### Documentation Deliverables
+
+- `docs/API-REFERENCE.md` — 480 lines, all 15 service modules with function signatures
+- `docs/ARCHITECTURE.md` — 380 lines, 4-layer architecture, data flow, file system layout, test architecture
+- `docs/SETUP-GUIDE.md` — 290 lines, from-zero tutorial with OAuth configuration
+- `docs/TROUBLESHOOTING.md` — 310 lines, 8 categories with specific fixes
+- `README.md` — Updated with v1.3 features, test suite table, documentation links
 
 ### Technical Debt
 
 - CORE-03 (clean stop) not formally verified
-- No test runner configured (jest/vitest); Phase 7 tests can't run yet
+- 47 tests across 5 suites passing (jest + ts-jest)
 - Some `any` casts in serverManager.ts for missing native typings
 - Plugin metadata extracted on every list load (no caching)
 - Player store uses username as key (not UUID) — join events don't include UUIDs
