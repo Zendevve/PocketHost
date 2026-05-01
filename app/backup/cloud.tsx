@@ -26,6 +26,7 @@ import {
   getCachedBackups,
   setAccessToken,
 } from '../../src/services/cloudBackupService';
+import { GOOGLE_OAUTH_WEB_CLIENT_ID, isGoogleOAuthConfigured } from '../../src/lib/config';
 import * as FileSystem from 'expo-file-system';
 import * as AuthSession from 'expo-auth-session';
 
@@ -83,10 +84,16 @@ export default function CloudBackupScreen() {
   }, []);
 
   const handleSignIn = useCallback(async () => {
-    // Google OAuth via expo-auth-session
-    // Note: Requires web client ID configured in app.json / eas.json
+    if (!isGoogleOAuthConfigured()) {
+      Alert.alert(
+        'OAuth Not Configured',
+        'Google Drive sign-in requires a Web Client ID. Set googleOAuthWebClientId in app.json extra field.'
+      );
+      return;
+    }
+
     const redirectUri = AuthSession.makeRedirectUri({ scheme: 'pockethost' });
-    const clientId = 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com'; // Replace with actual client ID
+    const clientId = GOOGLE_OAUTH_WEB_CLIENT_ID;
 
     const discovery = {
       authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
@@ -243,6 +250,7 @@ export default function CloudBackupScreen() {
   );
 
   if (!storeSignedIn) {
+    const oauthReady = isGoogleOAuthConfigured();
     return (
       <View style={theme.screen}>
         <Text style={theme.heading}>Cloud Backups</Text>
@@ -251,14 +259,21 @@ export default function CloudBackupScreen() {
           <Text style={{ color: theme.colors.text, fontSize: 15, marginBottom: 16 }}>
             Sign in with Google to enable cloud backups
           </Text>
-          <Button title="Sign in with Google" onPress={handleSignIn} />
+          <Button
+            title={oauthReady ? 'Sign in with Google' : 'OAuth Not Configured'}
+            onPress={handleSignIn}
+            variant={oauthReady ? 'default' : 'secondary'}
+          />
+          {!oauthReady && (
+            <Text style={{ color: theme.colors.danger, fontSize: 13, marginTop: 12, textAlign: 'center' }}>
+              Google OAuth Web Client ID is missing.{'\n'}
+              Set googleOAuthWebClientId in app.json extra field.
+            </Text>
+          )}
         </Card>
         {error && (
           <Text style={{ color: theme.colors.danger, marginTop: 12 }}>{error}</Text>
         )}
-        <Text style={[theme.subtext, { marginTop: 20 }]}>
-          Note: Configure your Google OAuth Web Client ID in app.json for production use.
-        </Text>
       </View>
     );
   }

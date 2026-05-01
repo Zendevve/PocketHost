@@ -13,6 +13,22 @@ export interface CloudBackupEntry {
   worldName: string;
 }
 
+interface DriveFile {
+  id: string;
+  name: string;
+  size?: string;
+  createdTime?: string;
+  appProperties?: Record<string, string>;
+}
+
+interface DriveFilesList {
+  files?: DriveFile[];
+}
+
+interface DriveAbout {
+  user?: { displayName?: string };
+}
+
 let accessToken: string | null = null;
 
 async function getAccessToken(): Promise<string | null> {
@@ -28,9 +44,9 @@ async function getAccessToken(): Promise<string | null> {
 export function setAccessToken(token: string | null): void {
   accessToken = token;
   if (token) {
-    AsyncStorage.setItem('gdrive_access_token', token);
+    AsyncStorage.setItem('gdrive_access_token', token).catch(() => {});
   } else {
-    AsyncStorage.removeItem('gdrive_access_token');
+    AsyncStorage.removeItem('gdrive_access_token').catch(() => {});
   }
 }
 
@@ -63,8 +79,8 @@ async function findOrCreateFolder(folderName: string): Promise<string> {
     )}&spaces=drive&fields=files(id,name)`,
     { headers: { Authorization: `Bearer ${token}` } }
   );
-  const searchData = await searchRes.json();
-  if (searchData.files?.length > 0) {
+  const searchData = (await searchRes.json()) as DriveFilesList;
+  if (searchData.files && searchData.files.length > 0) {
     return searchData.files[0].id;
   }
 
@@ -79,8 +95,19 @@ async function findOrCreateFolder(folderName: string): Promise<string> {
       mimeType: 'application/vnd.google-apps.folder',
     }),
   });
-  const createData = await createRes.json();
+  const createData = (await createRes.json()) as DriveFile;
+  if (!createData.id) {
+    throw new Error('Failed to create Drive folder');
+  }
   return createData.id;
+}
+
+function getFileSize(info: FileSystem.FileInfo): number {
+  if (!info.exists) return 0;
+  // expo-file-system FileInfo type is missing size/modificationTime in the TS defs,
+  // but they exist at runtime for existing files.
+  const infoWithSize = info as FileSystem.FileInfo & { size?: number };
+  return infoWithSize.size ?? 0;
 }
 
 export async function uploadBackup(
@@ -93,7 +120,16 @@ export async function uploadBackup(
 
   const fileName = filePath.split('/').pop() || `pockethost-backup-${Date.now()}.zip`;
   const fileInfo = await FileSystem.getInfoAsync(filePath);
-  const fileSize = fileInfo.exists ? (fileInfo as any).size || 0 : 0;
+  const fileSize = getFileSize(fileInfo);
+
+  // Warn if file exceeds simple-upload limit
+  const FIVE_MB = 5 * 1024 * 1024;
+  if (fileSize > FIVE_MB) {
+    throw new Error(
+      `Backup size (${(fileSize / 1024 / 1024).toFixed(1)} MB) exceeds the 5 MB ` +
+        `simple-upload limit. Resumable uploads are not yet supported.`
+    );
+  }
 
   const folderId = await findOrCreateFolder('PocketHost Backups');
 
@@ -112,7 +148,6 @@ export async function uploadBackup(
     encoding: FileSystem.EncodingType.Base64,
   });
 
-  // Simple upload for files under 5MB; for larger files, resumable upload would be needed
   const boundary = 'pockethost_boundary';
   const body =
     `--${boundary}\r\n` +
@@ -145,7 +180,7 @@ export async function uploadBackup(
     throw new Error(`Upload failed: ${uploadRes.status} ${err}`);
   }
 
-  const data = await uploadRes.json();
+  const data = (await uploadRes.json()) as DriveFile;
   onProgress?.(100);
 
   const entry: CloudBackupEntry = {
@@ -183,13 +218,13 @@ export async function listDriveBackups(): Promise<CloudBackupEntry[]> {
     throw new Error(`List failed: ${res.status} ${err}`);
   }
 
-  const data = await res.json();
-  const entries: CloudBackupEntry[] = (data.files || []).map((f: any) => ({
+  const data = (await res.json()) as DriveFilesList;
+  const entries: CloudBackupEntry[] = (data.files || []).map((f) => ({
     id: f.id,
     driveFileId: f.id,
     name: f.name,
     size: parseInt(f.size || '0', 10),
-    timestamp: f.createdTime,
+    timestamp: f.createdTime || '',
     worldName: f.appProperties?.worldName || 'unknown',
   }));
 
@@ -201,7 +236,7 @@ export async function getCachedBackups(): Promise<CloudBackupEntry[]> {
   const cached = await AsyncStorage.getItem('gdrive_backups_cache');
   if (!cached) return [];
   try {
-    return JSON.parse(cached);
+    return JSON.parse(cached) as CloudBackupEntry[];
   } catch {
     return [];
   }

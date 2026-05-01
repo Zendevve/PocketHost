@@ -26,6 +26,18 @@ export async function getTemplatesDirectory(): Promise<string> {
   return dir;
 }
 
+function getFileSize(info: FileSystem.FileInfo): number {
+  if (!info.exists) return 0;
+  const withSize = info as FileSystem.FileInfo & { size?: number };
+  return withSize.size ?? 0;
+}
+
+function getFileModificationTime(info: FileSystem.FileInfo): number {
+  if (!info.exists) return Date.now();
+  const withTime = info as FileSystem.FileInfo & { modificationTime?: number };
+  return withTime.modificationTime ?? Date.now();
+}
+
 export async function listWorlds(): Promise<Array<{ name: string; path: string; size: number }>> {
   const worldsDir = await getWorldsDirectory();
   try {
@@ -39,7 +51,7 @@ export async function listWorlds(): Promise<Array<{ name: string; path: string; 
         const levelDat = `${path}/level.dat`;
         const levelInfo = await FileSystem.getInfoAsync(levelDat);
         if (levelInfo.exists) {
-          worlds.push({ name, path, size: info.size || 0 });
+          worlds.push({ name, path, size: getFileSize(info) });
         }
       }
     }
@@ -59,14 +71,13 @@ export async function listTemplates(): Promise<WorldTemplate[]> {
       const path = `${templatesDir}/${name}`;
       const info = await FileSystem.getInfoAsync(path);
       const id = name.replace('.zip', '');
-      const infoAny = info as any;
       templates.push({
         id,
         name: id,
         description: 'Template',
         sourceWorldPath: path,
-        createdAt: infoAny.modificationTime || Date.now(),
-        size: infoAny.size || 0,
+        createdAt: getFileModificationTime(info),
+        size: getFileSize(info),
       });
     }
     return templates.sort((a, b) => b.createdAt - a.createdAt);
