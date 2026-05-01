@@ -16,7 +16,7 @@ export default function OnlinePlayersTab() {
 
   const { isLoading, kick, ban, op, deop, setGamemode } = usePlayerActions();
 
-  const [opsList, setOpsList] = useState<{ name: string }[]>([]);
+  const [opsList, setOpsList] = useState<string[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalType, setModalType] = useState<'kick' | 'ban'>('kick');
   const [selectedPlayer, setSelectedPlayer] = useState('');
@@ -24,7 +24,7 @@ export default function OnlinePlayersTab() {
   useEffect(() => {
     if (!config?.worldPath) return;
     getPlayerList(config.worldPath, 'ops').then((list) => {
-      setOpsList(list.map((e) => ({ name: e.name })));
+      setOpsList(list.map((e) => e.name || '').filter(Boolean));
     });
   }, [activeServerId, config?.worldPath]);
 
@@ -32,7 +32,7 @@ export default function OnlinePlayersTab() {
 
   const handleAction = (player: { username: string }) => {
     const isOp = opsList.some(
-      (o) => o.name.toLowerCase() === player.username.toLowerCase()
+      (name) => name.toLowerCase() === player.username.toLowerCase()
     );
 
     Alert.alert(player.username, 'Choose an action', [

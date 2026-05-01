@@ -16,15 +16,17 @@ Core Minecraft server execution on Android, Playit.gg tunnel integration, live d
 ### v1.1 Backup & Polish (2026-04-28)
 World backup ZIP creation and restore with dual-confirmation safety, nested YAML tree editor for complex plugin configs, plugin JAR metadata extraction (name/version/author) with corrupted JAR warnings.
 
-## Current Milestone: v1.3 (Planning)
+## Current Milestone: v1.3 Competitor Parity (Complete)
 
-**Goal:** TBD — next milestone not yet defined.
+**Goal:** Achieve feature parity with competitor apps by delivering cloud backup, server monitoring, advanced world management, and analytics.
 
-**Potential directions:**
-- Server monitoring & logging improvements
-- World management (multiple worlds, world templates)
-- Advanced player features (chat, stats)
-- UI/UX polish and theming
+**Shipped:** 2026-05-01 — 4 phases (11-14), 12 new files, +2,100 LOC.
+
+**Phases:**
+- Phase 11: Cloud Backup — Google Drive OAuth, backup upload/download, cached backup list
+- Phase 12: Server Monitoring — TPS/memory/player metrics, 24h history, bar chart dashboard
+- Phase 13: World Management — templates, duplication, rename, delete, create from template
+- Phase 14: Analytics Dashboard — player sessions, uptime history, peak players, daily stats
 
 ## Requirements
 
@@ -52,6 +54,17 @@ World backup ZIP creation and restore with dual-confirmation safety, nested YAML
 - ✓ **Sharing & Invites** (SHAR-01, SHAR-02, SHAR-03) — v1.2 Phase 10
   - Clipboard copy via expo-clipboard; QR code modal via react-native-qrcode-svg; native OS share sheet integration.
 
+### Validated
+
+- ✓ **Cloud Backup to Google Drive** (CLOUD-01 to CLOUD-04) — v1.3 Phase 11
+  - OAuth sign-in via expo-auth-session, backup upload to Drive, list Drive backups, restore from Drive.
+- ✓ **Server Monitoring & Metrics** (MON-01 to MON-04) — v1.3 Phase 12
+  - Real-time TPS/memory/player tracking, historical metrics store (24h), performance dashboard with bar charts.
+- ✓ **Advanced World Management** (WORLD-01 to WORLD-04) — v1.3 Phase 13
+  - World templates/presets, world duplication, rename, delete, create world from template.
+- ✓ **Analytics Dashboard** (ANALYTICS-01 to ANALYTICS-04) — v1.3 Phase 14
+  - Player session tracking, total playtime, server uptime history, peak player counts, daily activity summary.
+
 ### Active
 
 - [ ] **TBD** — Next milestone requirements not yet defined.
@@ -61,7 +74,7 @@ World backup ZIP creation and restore with dual-confirmation safety, nested YAML
 - **iOS Support** — iOS does not allow the arbitrary spawning of Java Virtual Machines or child processes required to run the Java Edition server natively.
 - **Remote Cloud Hosting** — PocketHost runs the server directly on the Android hardware; it is not a frontend for a cloud VPS.
 - **BungeeCord / Velocity** — Multi-server proxying is outside scope.
-- **Cloud backup upload** — Google Drive/Dropbox integration deferred.
+- **Cloud backup providers other than Google Drive** — Dropbox/OneDrive deferred.
 - **Scheduled backups** — Manual-only for v1.
 - **Backup retention policies** — No automatic cleanup.
 - **Config undo/redo and search** — Out of scope for v1.1 editor.
@@ -72,10 +85,16 @@ World backup ZIP creation and restore with dual-confirmation safety, nested YAML
 
 **Shipped v1.2** — 3 phases (8-10), 2 days (Apr 28-29, 2026). 46 files changed, +3,308 / -738 LOC.
 
+**Shipped v1.3** — 4 phases (11-14), 1 day (May 1, 2026). 12 files changed, +2,100 LOC.
+
 **Outcomes:**
 - Performance tuning — server.properties sliders, Low/Med/High presets, Aikar's JVM toggle, restart flow.
 - Player management — console log parser for join/leave events, real-time online list, context actions, whitelist/ban/ops tabs.
 - Sharing & invites — clipboard copy, QR code modal, native share sheet.
+- Cloud backup — Google Drive OAuth via expo-auth-session, multipart upload, folder management, cached backup list.
+- Server monitoring — 30-second metrics collection, 24h rolling history, bar chart visualization using native Views.
+- World management — template creation from worlds, world duplication/rename/delete, create world from template.
+- Analytics — player session tracking via join/leave events, server uptime tracking, top players, daily activity summary.
 
 **Known Issues & Technical Debt:**
 - CORE-03 (clean stop) not formally verified; relies on UI stop button.
@@ -83,6 +102,8 @@ World backup ZIP creation and restore with dual-confirmation safety, nested YAML
 - Some TypeScript workarounds: `any` casts in `serverManager.ts` for missing native typings.
 - Plugin metadata extracted on every list load (no caching).
 - Player store uses username as key (not UUID) — join events don't include UUIDs.
+- Google Drive OAuth requires web client ID configuration in app.json for production use.
+- NBT parsing not implemented (level.dat properties not readable).
 
 **User Feedback:** N/A — not yet released externally; internal testing only.
 

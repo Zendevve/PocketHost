@@ -141,7 +141,13 @@ export default function BackupScreen() {
         title="Create Backup Now"
         onPress={handleCreateBackup}
         disabled={busy || serverStatus === 'error'}
-        style={{ marginTop: 16, marginBottom: 16 }}
+        style={{ marginTop: 16, marginBottom: 12 }}
+      />
+      <Button
+        title="Cloud Backups (Google Drive)"
+        variant="secondary"
+        onPress={() => router.push('/backup/cloud')}
+        style={{ marginBottom: 16 }}
       />
 
       {busy && progressStage && (

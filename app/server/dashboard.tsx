@@ -83,6 +83,18 @@ export default function ServerDashboardScreen() {
         style={{ marginBottom: 12 }}
       />
       <Button
+        title="Monitoring"
+        variant="secondary"
+        onPress={() => router.push('/server/monitoring')}
+        style={{ marginBottom: 12 }}
+      />
+      <Button
+        title="Analytics"
+        variant="secondary"
+        onPress={() => router.push('/server/analytics')}
+        style={{ marginBottom: 12 }}
+      />
+      <Button
         title="Players"
         variant="secondary"
         onPress={() => router.push('/players')}

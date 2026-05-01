@@ -12,6 +12,8 @@ export default function ServerLayout() {
       <Stack.Screen name="dashboard" options={{ title: 'Dashboard' }} />
       <Stack.Screen name="console" options={{ title: 'Console' }} />
       <Stack.Screen name="properties" options={{ title: 'Properties' }} />
+      <Stack.Screen name="monitoring" options={{ title: 'Monitoring' }} />
+      <Stack.Screen name="analytics" options={{ title: 'Analytics' }} />
     </Stack>
   );
 }
