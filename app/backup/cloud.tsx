@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
-  FlatList,
+  ScrollView,
   Alert,
   ActivityIndicator,
   Modal,
@@ -264,7 +264,7 @@ export default function CloudBackupScreen() {
   }
 
   return (
-    <View style={theme.screen}>
+    <ScrollView style={theme.screen} contentContainerStyle={{ paddingBottom: 40 }}>
       <View style={styles.headerRow}>
         <Text style={theme.heading}>Cloud Backups</Text>
         <Pressable onPress={handleSignOut}>
@@ -284,28 +284,21 @@ export default function CloudBackupScreen() {
           <Text style={[styles.emptyText, { marginTop: 4 }]}>Upload a local backup below.</Text>
         </Card>
       ) : (
-        <FlatList
-          data={backups}
-          keyExtractor={(item) => item.driveFileId}
-          renderItem={renderCloudBackup}
-          contentContainerStyle={{ gap: 12 }}
-          refreshing={isLoading}
-          onRefresh={refreshList}
-        />
+        backups.map((item) => (
+          <View key={item.driveFileId}>{renderCloudBackup({ item })}</View>
+        ))
       )}
 
       <Text style={[theme.heading, { fontSize: 18, marginTop: 20, marginBottom: 8 }]}>Upload Local Backup</Text>
-      <FlatList
-        data={localBackups}
-        keyExtractor={(item) => item.id}
-        renderItem={renderLocalBackup}
-        contentContainerStyle={{ gap: 12 }}
-        ListEmptyComponent={
-          <Card style={styles.emptyCard}>
-            <Text style={styles.emptyText}>No local backups. Create one first.</Text>
-          </Card>
-        }
-      />
+      {localBackups.length === 0 ? (
+        <Card style={styles.emptyCard}>
+          <Text style={styles.emptyText}>No local backups. Create one first.</Text>
+        </Card>
+      ) : (
+        localBackups.map((item) => (
+          <View key={item.id}>{renderLocalBackup({ item })}</View>
+        ))
+      )}
 
       {/* Restore Confirmation */}
       <Modal visible={showRestoreConfirm} transparent animationType="fade">
@@ -334,7 +327,7 @@ export default function CloudBackupScreen() {
           </Card>
         </View>
       </Modal>
-    </View>
+    </ScrollView>
   );
 }
 

@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
-  FlatList,
+  ScrollView,
   Alert,
   TextInput,
   Modal,
@@ -241,37 +241,31 @@ export default function WorldsScreen() {
   );
 
   return (
-    <View style={theme.screen}>
+    <ScrollView style={theme.screen} contentContainerStyle={{ paddingBottom: 40 }}>
       <Text style={theme.heading}>Worlds</Text>
       <Text style={theme.subtext}>Manage your Minecraft worlds and templates</Text>
 
       <Text style={[styles.sectionTitle, { marginTop: 12 }]}>Your Worlds</Text>
-      <FlatList
-        data={worlds}
-        keyExtractor={(item) => item.path}
-        renderItem={renderWorld}
-        contentContainerStyle={{ gap: 12 }}
-        refreshing={isLoading}
-        onRefresh={refreshData}
-        ListEmptyComponent={
-          <Card style={styles.emptyCard}>
-            <Text style={styles.emptyText}>No worlds found. Create one in setup.</Text>
-          </Card>
-        }
-      />
+      {worlds.length === 0 ? (
+        <Card style={styles.emptyCard}>
+          <Text style={styles.emptyText}>No worlds found. Create one in setup.</Text>
+        </Card>
+      ) : (
+        worlds.map((item) => (
+          <View key={item.path}>{renderWorld({ item })}</View>
+        ))
+      )}
 
       <Text style={[styles.sectionTitle, { marginTop: 20 }]}>Templates</Text>
-      <FlatList
-        data={templates}
-        keyExtractor={(item) => item.id}
-        renderItem={renderTemplate}
-        contentContainerStyle={{ gap: 12 }}
-        ListEmptyComponent={
-          <Card style={styles.emptyCard}>
-            <Text style={styles.emptyText}>No templates yet. Create one from an existing world.</Text>
-          </Card>
-        }
-      />
+      {templates.length === 0 ? (
+        <Card style={styles.emptyCard}>
+          <Text style={styles.emptyText}>No templates yet. Create one from an existing world.</Text>
+        </Card>
+      ) : (
+        templates.map((item) => (
+          <View key={item.id}>{renderTemplate({ item })}</View>
+        ))
+      )}
 
       {renderModal(showDuplicateModal, setShowDuplicateModal, 'Duplicate World', handleDuplicate)}
       {renderModal(showRenameModal, setShowRenameModal, 'Rename World', handleRename)}
@@ -282,7 +276,7 @@ export default function WorldsScreen() {
         'Create World from Template',
         handleCreateFromTemplate
       )}
-    </View>
+    </ScrollView>
   );
 }
 
