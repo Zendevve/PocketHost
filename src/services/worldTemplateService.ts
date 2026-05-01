@@ -1,5 +1,6 @@
 import * as FileSystem from 'expo-file-system';
 import AdmZip from 'adm-zip';
+import { decompressLevelDat, parseNbt, extractWorldProperties, WorldProperties } from './nbtParser';
 
 export interface WorldTemplate {
   id: string;
@@ -8,6 +9,13 @@ export interface WorldTemplate {
   sourceWorldPath: string;
   createdAt: number;
   size: number;
+}
+
+export interface WorldInfo {
+  name: string;
+  path: string;
+  size: number;
+  properties: Partial<WorldProperties>;
 }
 
 export async function getWorldsDirectory(): Promise<string> {
@@ -212,12 +220,21 @@ export async function createWorldFromTemplate(
   return destPath;
 }
 
-export async function getWorldProperties(worldPath: string): Promise<Record<string, string>> {
+export async function getWorldProperties(worldPath: string): Promise<Partial<WorldProperties>> {
   try {
     const levelDatPath = `${worldPath}/level.dat`;
-    // level.dat is NBT format; we can't parse it easily in JS without a library
-    // Return placeholder for now
-    return { note: 'level.dat parsing requires NBT library' };
+    const info = await FileSystem.getInfoAsync(levelDatPath);
+    if (!info.exists) return {};
+
+    const base64 = await FileSystem.readAsStringAsync(levelDatPath, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    const gzipData = Buffer.from(base64, 'base64');
+    const decompressed = decompressLevelDat(new Uint8Array(gzipData));
+    if (!decompressed) return {};
+
+    const nbt = parseNbt(decompressed);
+    return extractWorldProperties(nbt);
   } catch {
     return {};
   }

@@ -98,12 +98,11 @@ World backup ZIP creation and restore with dual-confirmation safety, nested YAML
 
 **Known Issues & Technical Debt:**
 - CORE-03 (clean stop) not formally verified; relies on UI stop button.
-- No test runner configured (jest/vitest); Phase 7 tests exist but can't run yet.
+- Test runner configured (jest + ts-jest); 47 tests passing across 5 test suites.
 - Some TypeScript workarounds: `any` casts in `serverManager.ts` for missing native typings.
 - Plugin metadata extracted on every list load (no caching).
 - Player store uses username as key (not UUID) — join events don't include UUIDs.
-- Google Drive OAuth requires web client ID configuration in app.json for production use.
-- NBT parsing not implemented (level.dat properties not readable).
+- Google Drive OAuth requires web client ID configuration in app.json for production use (see `.github/GOOGLE_DRIVE_SETUP.md`).
 
 **User Feedback:** N/A — not yet released externally; internal testing only.
 
