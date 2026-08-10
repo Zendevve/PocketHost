@@ -1,3 +1,6 @@
+
+</think>
+
 # PocketHost
 
 Turn your Android device into a lightweight, portable Minecraft Java Edition server host. PocketHost lets you create, manage, and run Minecraft worlds directly from your phone — no desktop or paid remote hosting required.
@@ -54,6 +57,7 @@ Turn your Android device into a lightweight, portable Minecraft Java Edition ser
 - Node.js LTS (20.x or 22.x)
 - Android Studio or a physical Android device running Android 8.0+
 - [Expo CLI](https://docs.expo.dev/get-started/installation/)
+- Google OAuth Client ID: Replace `YOUR_WEB_CLIENT_ID` in `app.json`'s `extra.googleOAuthWebClientId` to enable Cloud Backup.
 
 ### Installation
 
